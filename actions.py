@@ -1,8 +1,6 @@
 from mysql.connector import connect
 
-
-conn = connect(host='localhost', user='root', password='1234')
-cur = conn.cursor()
+conn = cur = None
 
 
 def delete_record(table, column, value):

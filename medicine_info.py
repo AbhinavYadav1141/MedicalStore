@@ -1,16 +1,13 @@
 from mysql.connector import connect
 import actions
 
-conn = connect(host='localhost', user='root', password='1234')
+conn = connect(host='localhost', user='root', password='abhinav1')
 cur = conn.cursor()
 cur.execute("use MedicalStore")
 
 
 def create_record(barcode, name, m_type, composition):
-    if composition == "NULL":
-        query = f"insert into MedicineInfo values({barcode}, '{name}', '{m_type}', {composition})"
-    else:
-        query = f"insert into MedicineInfo values({barcode}, '{name}', '{m_type}', '{composition}')"
+    query = f"insert into MedicineInfo values({barcode}, '{name}', '{m_type}', '{composition}')"
     
     cur.execute(query)
     conn.commit()
@@ -112,14 +109,68 @@ def insert():
         m_type = input("Please enter a medicine type: ")
         
     composition = input("Enter composition: ")
-    if composition == '':
-        composition = "NULL"
         
     create_record(bar, name, m_type, composition)
 
 
 def delete():
-    pass
+    print()
+    print("____DELETE OPTIONS____")
+    print("2: Delete using barcode")
+    print("3: Delete using other column")
+    print("4: Delete using condition")
+    print("0: Home")
+    print("1: Medicine Information")
+    ch = input("Enter you choice: ")
+
+    while ch not in '01234' or len(ch) != 1:
+        ch = input("Invalid choice! Enter again: ")
+
+    if ch == '0':
+        return '0'
+
+    elif ch == '1':
+        return 1
+
+    elif ch in '23':
+        num = input("How many records do you want to delete: ")
+
+        while not num.isdigit():
+            num = input("Value you entered is not integer. Enter again: ")
+
+        if ch == '2':
+            column = 'barcode'
+        else:
+            column = input("Which column do you want to use for record matching: ")
+            columns = actions.get_columns("medicine_info")
+            while column.lower() not in columns:
+                column = input("The column you entered is not in table! Enter again: ")
+
+        records = []
+        cur.execute("desc MedicineInfo")
+        column_data = cur.fetchall()
+        d_type = None
+        for i in column_data:
+            if i[0] == column:
+                d_type = i[1]
+
+        for i in range(int(num)):
+            record = input(f"Enter record{i+1}: ")
+            while record == '':
+                record = input("Please enter record value: ")
+            if d_type == b'int':
+                while record == '' or not record.isdigit():
+                    record = input("This record should be an integer only. Please enter again: ")
+            records.append(record)
+
+        actions.delete_multiple("MedicineInfo", column, records)
+
+    elif ch == '4':
+        condition = input("Enter the condition: ")
+        try:
+            actions.delete_by_condition("MedicineInfo", condition)
+        except Exception as e:
+            print(e)
 
 
 def update():
@@ -195,6 +246,7 @@ def init():
     print("=" * 10 + "     Medicine Information     " + "=" * 10)
     while True:
         ch = input(msg)
+        code = None
 
         while ch not in '012345' or len(ch) != 1:
             ch = input("Invalid choice. Enter again: ")
@@ -207,13 +259,13 @@ def init():
             code = view()
 
         elif ch == '2':
-            code = insert()
+            insert()
 
         elif ch == '3':
             code = delete()
 
         elif ch == '4':
-            code = update()
+            update()
 
         elif ch == '5':
             code = search()
