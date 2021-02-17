@@ -33,8 +33,11 @@ def search(table, column, value, operator):
 
 
 def search_multiple(table, column, values: list, sel_col='*', operator='='):
-    query = f"select {sel_col} from {table} where {column} in {tuple(values)}"
-    # print(query)
+    if len(values) == 1:
+        query = f"select {sel_col} from {table} where {column} = '{values[0]}'"
+    else:
+        query = f"select {sel_col} from {table} where {column} in {tuple(values)}"
+    print(query)
     cur.execute(query)
     result = cur.fetchall()
     return result
@@ -62,7 +65,7 @@ def format_print(columns, values):
 
     for i in values:
         for j in i:
-            print(i, end='     ')
+            print(j, end='     ')
         print()
 
 

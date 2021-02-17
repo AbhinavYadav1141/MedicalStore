@@ -7,7 +7,11 @@ cur.execute("use MedicalStore")
 
 
 def create_record(barcode, name, m_type, composition):
-    query = f"insert into MedicineInfo values({barcode}, '{name}', '{m_type}', '{composition}')"
+    if composition == "NULL":
+        query = f"insert into MedicineInfo values({barcode}, '{name}', '{m_type}', {composition})"
+    else:
+        query = f"insert into MedicineInfo values({barcode}, '{name}', '{m_type}', '{composition}')"
+    
     cur.execute(query)
     conn.commit()
 
@@ -96,9 +100,21 @@ def input_rows():
 def insert():
     print()
     bar = input("Enter barcode of medicine: ")
+    while not bar.isdigit():
+        bar = input("Barcode should be integer. Please enter again: ")
+        
     name = input("Enter name of medicine: ")
+    while name == '':
+        name= input("Please enter a name: ")
+        
     m_type = input("Enter type  (eg: antipyretic, analgesic etc.): ")
+    while m_type == "":
+        m_type = input("Please enter a medicine type: ")
+        
     composition = input("Enter composition: ")
+    if composition == '':
+        composition = "NULL"
+        
     create_record(bar, name, m_type, composition)
 
 
@@ -221,3 +237,6 @@ if __name__ == '__main__':
     actions.conn = conn
     actions.cur = cur
     init()
+    
+    
+    
