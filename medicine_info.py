@@ -289,6 +289,3 @@ if __name__ == '__main__':
     actions.conn = conn
     actions.cur = cur
     init()
-    
-    
-    
