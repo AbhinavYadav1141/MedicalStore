@@ -71,14 +71,42 @@ def show_columns(table, columns):
 
 
 def format_print(columns, values):
-    for i in columns:
-        print(i.upper(), end='     ')
-    print()
+    sizes = {}
+    if len(values) > 0:
+        for i in range(len(columns)):
+            longest = 0
+            for j in values:
+                j = j[i]
+                if len(str(j)) > longest:
+                    longest = len(str(j))
+            sizes[columns[i]] = longest
 
-    for i in values:
-        for j in i:
-            print(j, end='     ')
-        print()
+        for i in sizes:
+            print("+", end='')
+            print("-" * (sizes[i] + 4), end='')
+        print("+")
+
+        for i in columns:
+            print("|", i.upper(), " "*(sizes[i] - len(str(i))), end='    ', sep='')
+        print("|")
+
+        for i in sizes:
+            print("+", end='')
+            print("-" * (sizes[i] + 4), end='')
+        print("+")
+
+        for i in values:
+            for j in range(len(i)):
+                print("|", i[j], " "*(sizes[columns[j]] - len(str(i[j]))), end='    ', sep='')
+            print("|")
+
+        for i in sizes:
+            print("+", end='')
+            print("-" * (sizes[i] + 4), end='')
+        print("+")
+
+    else:
+        print("No records!")
 
 
 def update(table, column, value, condition):

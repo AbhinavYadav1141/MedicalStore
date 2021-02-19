@@ -1,7 +1,7 @@
 from mysql.connector import connect
 import actions
 
-conn = connect(host='localhost', user='root', password='1234')
+conn = connect(host='localhost', user='root', password='abhinav1')
 cur = conn.cursor()
 cur.execute("use MedicalStore")
 
