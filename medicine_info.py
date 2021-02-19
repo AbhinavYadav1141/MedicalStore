@@ -49,10 +49,10 @@ def view():
         actions.format_print(actions.get_columns("MedicineInfo"), actions.show_all("MedicineInfo"))
 
     elif ch == '3':
-        column = input("Which column do you want to use for record matching")
+        column = input("Which column do you want to use for record matching").lower()
         columns = actions.get_columns("MedicineInfo")
         while column not in columns:
-            column = input("Column you entered is not in table. Please enter again: ")
+            column = input("Column you entered is not in table. Please enter again: ").lower()
         records = input_rows()
         actions.format_print(columns, actions.search_multiple("MedicineInfo", column, records))
 
@@ -62,10 +62,10 @@ def view():
 
     elif ch == '5':
         columns = input_cols()
-        column = input("Which column do you want to use for record matching")
+        column = input("Which column do you want to use for record matching").lower()
         columns_all = actions.get_columns("MedicineInfo")
         while column not in columns_all:
-            column = input("Column you entered is not in table. Please enter again: ")
+            column = input("Column you entered is not in table. Please enter again: ").lower()
         records = input_rows()
         actions.format_print(columns, actions.search_multiple("medicineInfo", column, records, columns))
 
@@ -81,7 +81,7 @@ def input_cols():
     for i in range(int(num)):
         column = input(f"Enter name of column{i + 1}: ").lower()
         while column not in columns:
-            column = input("The column you entered is not in table. Please enter again: ")
+            column = input("The column you entered is not in table. Please enter again: ").lower()
         clm.append(column)
     return clm
 
@@ -190,10 +190,10 @@ def update():
         condition = input("Enter condition: ")
 
     if ch in '234' and len(ch) == 1:
-        column = input("Which column do you want to update: ")
+        column = input("Which column do you want to update: ").lower()
         columns = actions.get_columns("MedicineInfo")
         while column not in columns:
-            column = input("Column you entered is not in table! Enter again: ")
+            column = input("Column you entered is not in table! Enter again: ").lower()
         val = input("Enter value: ")
         try:
             actions.update("MedicineInfo", column, val, condition)
