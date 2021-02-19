@@ -119,11 +119,87 @@ def insert():
 
 
 def delete():
-    pass
+    print()
+    print("Delete Options")
+    print("2. Delete using barcode")
+    print("3. Delete using name")
+    print("4. Delete using condition")
+    print("0. Home")
+    print("1. Medicine Information")
+    ch = input("Enter your choice: ")
+
+    while ch not in '01234' or len(ch) != 1:
+        ch = input("Invalid choice! Please enter again: ")
+
+    if ch == '0':
+        return 0
+
+    elif ch == '1':
+        return '1'
+
+    elif ch == '2':
+        bar = input("Enter barcode of medicine to be deleted: ")
+        while not bar.isdigit():
+            bar = input("Barcode should be an integer only! Please enter again: ")
+
+        actions.delete_record("MedicineInfo", "Barcode", bar)
+
+    elif ch == '3':
+        name = input("Enter name of medicine: ")
+        actions.delete_record("MedicineInfo", "Name", name)
+
+    elif ch == '4':
+        condition = input("Enter condition for deletion: ")
+        try:
+            actions.delete_by_condition(condition)
+        except Exception as e:
+            print(e)
+            print("Your condition had the above error!")
 
 
 def update():
-    pass
+    print("Update options:")
+    print("2. Update using barcode")
+    print("3. Update using name")
+    print("4. Update using condition")
+    print("0. Home")
+    print("1. Medicine Information")
+    ch = input("Enter your choice: ")
+
+    while ch not in '01234' or len(ch) != 1:
+        ch = input("Invalid choice! Please enter again: ")
+
+    if ch == '0':
+        return 0
+
+    elif ch == '1':
+        return '1'
+
+    elif ch == '2':
+        bar = input("Enter barcode of medicine: ")
+        while not bar.isdigit():
+            bar = input("Barcode should be an integer only! Please enter again: ")
+
+        condition = f"Barcode='{bar}'"
+
+    elif ch == '3':
+        name = input("Enter name of medicine: ")
+        condition = f"Name='{name}'"
+
+    elif ch == '4':
+        condition = input("Enter condition: ")
+
+    if ch in '234' and len(ch) == 1:
+        column = input("Which column do you want to update: ")
+        columns = actions.get_columns("MedicineInfo")
+        while column not in columns:
+            column = input("Column you entered is not in table! Enter again: ")
+        val = input("Enter value: ")
+        try:
+            actions.update("MedicineInfo", column, val, condition)
+        except Exception as e:
+            print("An error occurred!")
+            print(e)
 
 
 def search():
