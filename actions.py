@@ -100,3 +100,30 @@ def get_columns(table):
 def column_count(table):
     num = len(get_columns(table))
     return num
+
+
+def input_cols(table):
+    num = input("Enter no. of columns you want: ")
+    while not num.isdigit():
+        num = input("Enter integer value only: ")
+
+    columns = get_columns(table)
+    clm = []
+    print(columns)
+    for i in range(int(num)):
+        column = input(f"Enter name of column{i + 1}: ").lower()
+        while column not in columns:
+            column = input("The column you entered is not in table. Please enter again: ").lower()
+        clm.append(column)
+    return clm
+
+
+def input_rows():
+    num = input("Enter no. of records you want to view: ")
+    while not num.isdigit():
+        num = input("Enter integer value only: ")
+    records = []
+    for i in range(int(num)):
+        record = input(f'Enter record{i + 1}: ')
+        records.append(record)
+    return records

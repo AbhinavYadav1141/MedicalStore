@@ -53,48 +53,21 @@ def view():
         columns = actions.get_columns("MedicineInfo")
         while column not in columns:
             column = input("Column you entered is not in table. Please enter again: ").lower()
-        records = input_rows()
+        records = actions.input_rows()
         actions.format_print(columns, actions.search_multiple("MedicineInfo", column, records))
 
     elif ch == '4':
-        clm = input_cols()
+        clm = actions.input_cols("MedicineInfo")
         actions.format_print(clm, actions.show_columns("MedicineInfo", clm))
 
     elif ch == '5':
-        columns = input_cols()
+        columns = actions.input_cols("MedicineInfo")
         column = input("Which column do you want to use for record matching").lower()
         columns_all = actions.get_columns("MedicineInfo")
         while column not in columns_all:
             column = input("Column you entered is not in table. Please enter again: ").lower()
-        records = input_rows()
+        records = actions.input_rows()
         actions.format_print(columns, actions.search_multiple("medicineInfo", column, records, columns))
-
-
-def input_cols():
-    num = input("Enter no. of columns you want: ")
-    while not num.isdigit():
-        num = input("Enter integer value only: ")
-
-    columns = actions.get_columns("MedicineInfo")
-    clm = []
-    print(columns)
-    for i in range(int(num)):
-        column = input(f"Enter name of column{i + 1}: ").lower()
-        while column not in columns:
-            column = input("The column you entered is not in table. Please enter again: ").lower()
-        clm.append(column)
-    return clm
-
-
-def input_rows():
-    num = input("Enter no. of records you want to view: ")
-    while not num.isdigit():
-        num = input("Enter integer value only: ")
-    records = []
-    for i in range(int(num)):
-        record = input(f'Enter record{i + 1}: ')
-        records.append(record)
-    return records
 
 
 def insert():
