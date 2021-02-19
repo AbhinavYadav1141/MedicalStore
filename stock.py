@@ -296,7 +296,7 @@ def search():
 
 def init():
     print('\n')
-    print("=" * 10 + "     Medicine Information     " + "=" * 10)
+    print("=" * 10 + "     Stock Information     " + "=" * 10)
     while True:
         try:
             ch = input(msg)
