@@ -24,9 +24,10 @@ def create_table(receipt_no, count):
     cur.execute("use Sales")
     table = 't' + str(receipt_no)
 
-    l = []
+    lst = []
 
     for i in range(count):
+        print(f"\nRecord{i+1}")
         bar = input("Enter medicine barcode: ")
         while not bar.isdigit():
             bar = input("Barcode should be an integer. Please enter again: ")
@@ -39,9 +40,9 @@ def create_table(receipt_no, count):
         while not price.isdigit():
             price = input("Price should be an integer. Please enter again: ")
 
-        l.append((bar, qty, price))
+        lst.append((bar, qty, price))
 
-    create_records(l)
+    create_records(lst)
     cur.execute("use MedicalStore")
 
 

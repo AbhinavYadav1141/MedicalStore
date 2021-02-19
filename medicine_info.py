@@ -270,33 +270,37 @@ def init():
     print('\n')
     print("=" * 10 + "     Medicine Information     " + "=" * 10)
     while True:
-        ch = input(msg)
-        code = 1
+        try:
+            ch = input(msg)
+            code = 1
 
-        while ch not in '012345' or len(ch) != 1:
-            ch = input("Invalid choice. Enter again: ")
+            while ch not in '012345' or len(ch) != 1:
+                ch = input("Invalid choice. Enter again: ")
 
-        if ch == '0':
-            code = 0
-            break
+            if ch == '0':
+                code = 0
+                break
 
-        elif ch == '1':
-            code = view()
+            elif ch == '1':
+                code = view()
 
-        elif ch == '2':
-            insert()
+            elif ch == '2':
+                insert()
 
-        elif ch == '3':
-            code = delete()
+            elif ch == '3':
+                code = delete()
 
-        elif ch == '4':
-            code = update()
+            elif ch == '4':
+                code = update()
 
-        elif ch == '5':
-            code = search()
+            elif ch == '5':
+                code = search()
 
-        if code == '0':
-            break
+            if code == '0':
+                break
+        except Exception as e:
+            print("An Error occurred!!")
+            print(e)
 
 
 msg = """
