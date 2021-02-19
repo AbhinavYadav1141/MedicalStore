@@ -12,7 +12,7 @@ def init():
          Type varchar(20), Composition varchar(200))""",
         """create table if not exists Sale (ReceiptNo int, CustomerName varchar(30),
          TypeCount int, SaleDate date, SellingPrice int)""",
-        """create table if not exists Stock (BatchNo int, Barcode int, PurchaseDate date,
+        """create table if not exists Stock (BatchNo int, Barcode int, CostPrice int, PurchaseDate date,
          QuantityLeft int, Mfg date, Exp date)""",
         """create table if not exists Management (Month varchar(20), Year int,
          CostPrice int, SellingPrice int, NetGain int, NetPercent int)"""

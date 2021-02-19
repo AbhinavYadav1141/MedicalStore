@@ -6,14 +6,14 @@ conn = connect(host='localhost', user='root', password='1234')
 cur = conn.cursor()
 
 
-def create_record(batch, bar, date, qty_left, mfg, exp):
-    query = f"insert into Stock values({batch}, {bar}, '{date}', {qty_left}, '{mfg}'. '{exp}')"
+def create_record(batch, bar, cost, date, qty_left, mfg, exp):
+    query = f"insert into Stock values('{batch}', '{bar}', '{cost}', '{date}', {qty_left}, '{mfg}'. '{exp}')"
     cur.execute(query)
     conn.commit()
 
 
-def create_record_from_list(l):
-    create_record(l[0], l[1], l[2], l[3], l[4], l[5])
+def create_record_from_list(lst):
+    create_record(lst[0], lst[1], lst[2], lst[3], lst[4], lst[5], lst[6])
 
 
 def create_records(records):
@@ -126,6 +126,10 @@ def insert():
         while not bar.isdigit():
             bar = input("Barcode should be an integer only! Please enter again: ")
 
+        cp = input("Enter Cost per packet (Rs): ")
+        while not cp.isdigit():
+            cp = "Cost should be an integer! Please enter again: "
+
         p_date = input("Purchase date (yyyy-mm-dd): ")
 
         qty = input("Quantity left (no. of packets): ")
@@ -137,7 +141,7 @@ def insert():
         exp = input("Expiry date: ")
 
         try:
-            create_record(batch, bar, p_date, qty, mfg, exp)
+            create_record(batch, bar, cp, p_date, qty, mfg, exp)
         except Exception as e:
             print("An Error Occurred!!")
             print(e)
@@ -190,7 +194,7 @@ def delete():
     elif ch == '3':
         condition = input("Enter condition for deletion: ")
         try:
-            actions.delete_by_condition(condition)
+            actions.delete_by_condition("Stock", condition)
         except Exception as e:
             print(e)
             print("Your condition had the above error!")

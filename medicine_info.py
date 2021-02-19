@@ -151,7 +151,7 @@ def delete():
     elif ch == '4':
         condition = input("Enter condition for deletion: ")
         try:
-            actions.delete_by_condition(condition)
+            actions.delete_by_condition("MedicineInfo", condition)
         except Exception as e:
             print(e)
             print("Your condition had the above error!")
