@@ -11,7 +11,7 @@ def create_record(barcode, name, m_type, composition):
         query = f"insert into MedicineInfo values({barcode}, '{name}', '{m_type}', {composition})"
     else:
         query = f"insert into MedicineInfo values({barcode}, '{name}', '{m_type}', '{composition}')"
-    
+
     cur.execute(query)
     conn.commit()
 
@@ -102,19 +102,19 @@ def insert():
     bar = input("Enter barcode of medicine: ")
     while not bar.isdigit():
         bar = input("Barcode should be integer. Please enter again: ")
-        
+
     name = input("Enter name of medicine: ")
     while name == '':
-        name= input("Please enter a name: ")
-        
+        name = input("Please enter a name: ")
+
     m_type = input("Enter type  (eg: antipyretic, analgesic etc.): ")
     while m_type == "":
         m_type = input("Please enter a medicine type: ")
-        
+
     composition = input("Enter composition: ")
     if composition == '':
         composition = "NULL"
-        
+
     create_record(bar, name, m_type, composition)
 
 
@@ -242,15 +242,15 @@ def search():
         columns = actions.get_columns("MedicineInfo")
         condition = ''
         for i in range(int(num)):
-            col = input(f"Enter name of column{i+1}: ")
+            col = input(f"Enter name of column{i + 1}: ")
             while col not in columns:
                 col = input("The column you entered is not in table. Please enter again: ")
-            val = input(f"Enter value for column{i+1}: ")
-            op = input("Enter condition (<, =, >): ")
-            while op not in '<>=' or len(op) != 1:
+            val = input(f"Enter value for column{i + 1}: ")
+            op = input("Enter condition (<, =, >, >=, <=): ")
+            while op not in ['<', '>', '=', '<=', '>=']:
                 op = input("Wrong operator! Please enter again: ")
             condition += col + op + "'" + val + "'"
-            if i != int(num)-1:
+            if i != int(num) - 1:
                 condition += '&&'
         print(condition)
         actions.format_print(columns, actions.search_by_condition("MedicineInfo", condition))
@@ -303,17 +303,14 @@ msg = """
 
 Enter Your Choice:
 0: Home
-1: View 
-2: Insert
-3: Delete
-4: Update
-5: Search
+1: View records
+2: Insert records
+3: Delete records
+4: Update records
+5: Search records
 """
 
 if __name__ == '__main__':
     actions.conn = conn
     actions.cur = cur
     init()
-    
-    
-    

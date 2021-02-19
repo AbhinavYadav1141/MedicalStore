@@ -41,6 +41,20 @@ def search_multiple(table, column, values: list, sel_col='*', operator='='):
     return result
 
 
+def sysdate():
+    cur.execute("select sysdate()")
+    date = cur.fetchall()
+    return str(date[0][0].isoformat()).split('T')
+
+
+def date():
+    return sysdate()[0]
+
+
+def time():
+    return sysdate()[1]
+
+
 def show_all(table):
     cur.execute(f"select * from {table}")
     return cur.fetchall()
@@ -81,3 +95,8 @@ def get_columns(table):
         columns.append(i[0].lower())
 
     return columns
+
+
+def column_count(table):
+    num = len(get_columns(table))
+    return num
