@@ -271,6 +271,7 @@ def init():
     print("=" * 10 + "     Medicine Information     " + "=" * 10)
     while True:
         ch = input(msg)
+        code = 1
 
         while ch not in '012345' or len(ch) != 1:
             ch = input("Invalid choice. Enter again: ")
@@ -283,7 +284,7 @@ def init():
             code = view()
 
         elif ch == '2':
-            code = insert()
+            insert()
 
         elif ch == '3':
             code = delete()
