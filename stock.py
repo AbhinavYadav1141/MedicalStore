@@ -4,7 +4,7 @@ import actions
 
 conn = connect(host='localhost', user='root', password='1234')
 cur = conn.cursor()
-cur.execute("use Stock")
+cur.execute("use MedicalStore")
 
 
 def create_record(batch, bar, cost, date, qty_left, mfg, exp):
