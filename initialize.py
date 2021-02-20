@@ -2,7 +2,7 @@ from mysql.connector import connect
 
 
 def init():
-    conn = connect(host='localhost', user='root', password='abhinav1')
+    conn = connect(host='localhost', user='root', password='1234')
     cur = conn.cursor()
     queries = [
         "create database if not exists MedicalStore",

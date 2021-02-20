@@ -6,9 +6,12 @@ conn = connect(host='localhost', user='root', password='1234')
 cur = conn.cursor()
 cur.execute("use MedicalStore")
 
+actions.conn = conn
+actions.cur = cur
+
 
 def create_record(batch, bar, cost, date, qty_left, mfg, exp):
-    query = f"insert into Stock values('{batch}', '{bar}', '{cost}', '{date}', {qty_left}, '{mfg}'. '{exp}')"
+    query = f"insert into Stock values('{batch}', '{bar}', '{cost}', '{date}', {qty_left}, '{mfg}', '{exp}')"
     cur.execute(query)
     conn.commit()
 
@@ -126,6 +129,8 @@ def insert():
             num = input("No. of records should be an integer only! Enter again: ")
 
         records = []
+        print("Columns are: ")
+        print(actions.get_columns("Stock"))
         for i in range(int(num)):
             record = input("Enter values separated with semicolon(;): ").split(';')
 
@@ -319,7 +324,7 @@ Enter Your Choice:
 3: Delete records
 4: Update record
 5: Search records
-    """
+"""
 
 if __name__ == '__main__':
     actions.conn = conn

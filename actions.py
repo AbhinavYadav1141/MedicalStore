@@ -83,26 +83,26 @@ def format_print(columns, values):
 
         for i in sizes:
             print("+", end='')
-            print("-" * (sizes[i] + 4), end='')
+            print("-" * (sizes[i] + 2), end='')
         print("+")
 
         for i in columns:
-            print("|", i.upper(), " "*(sizes[i] - len(str(i))), end='    ', sep='')
+            print("|", i.upper(), " "*(sizes[i] - len(str(i))), end='  ', sep='')
         print("|")
 
         for i in sizes:
             print("+", end='')
-            print("-" * (sizes[i] + 4), end='')
+            print("-" * (sizes[i] + 2), end='')
         print("+")
 
         for i in values:
             for j in range(len(i)):
-                print("|", i[j], " "*(sizes[columns[j]] - len(str(i[j]))), end='    ', sep='')
+                print("|", i[j], " "*(sizes[columns[j]] - len(str(i[j]))), end='  ', sep='')
             print("|")
 
         for i in sizes:
             print("+", end='')
-            print("-" * (sizes[i] + 4), end='')
+            print("-" * (sizes[i] + 2), end='')
         print("+")
 
     else:
