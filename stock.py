@@ -312,13 +312,13 @@ def init():
 
 msg = """
 
-    Enter Your Choice:
-    0: Home
-    1: View Stock Information
-    2: Insert records
-    3: Delete records
-    4: Update record
-    5: Search records
+Enter Your Choice:
+0: Home
+1: View Stock Information
+2: Insert records
+3: Delete records
+4: Update record
+5: Search records
     """
 
 if __name__ == '__main__':
