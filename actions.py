@@ -71,10 +71,10 @@ def show_columns(table, columns):
 
 
 def format_print(columns, values):
-    sizes = {}
+    sizes = {i: len(i) for i in columns}
     if len(values) > 0:
         for i in range(len(columns)):
-            longest = 0
+            longest = sizes[columns[i]]
             for j in values:
                 j = j[i]
                 if len(str(j)) > longest:
