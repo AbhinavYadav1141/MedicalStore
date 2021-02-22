@@ -98,15 +98,33 @@ def insert():
     print("Enter records")
     receipt_no = input("Receipt no.: ")
     receipt_nos = actions.get_values("Sale", "ReceiptNo")
-    check = [False, False]
+    
     while True:
+        check = [False, False]
         if not receipt_no.isdigit():
             check[0] = False
         else:
             check[0] = True
+            
+        if receipt_no not in receipt_nos:
+            check[1] = True
+        else:
+            check[1] = False
+            
+        if check[0] and check[1]:
+            break
+        else:
+            if not check[0]:
+                print("Receipt No. should be an integer! Enter again: ", end='')
+            elif not check[1]:
+                print("Receipt No. is already taken! Enter different: ", end='')
+            else:
+                print("Receipt No. should be an integer and should be different every time! Enter again: ", end='')
+            receipt_no = input()
 
     cust = input("Customer Name: ")
-    
+    while cust == '':
+        cust = input("Customer name cannot be empty! Enter a name: ")
 
 
 def delete():

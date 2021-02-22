@@ -123,6 +123,15 @@ def get_columns(table):
         columns.append(i[0].lower())
 
     return columns
+    
+    
+def get_values(table, column):
+    cur.execute(f"select {column} from {table}")
+    val = cur.fetchall()
+    values=[]
+    for i in val:
+        values.append(i[0])
+    return values
 
 
 def column_count(table):
