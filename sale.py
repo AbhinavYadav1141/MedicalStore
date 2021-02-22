@@ -6,9 +6,13 @@ cur = conn.cursor()
 cur.execute("use MedicalStore")
 
 
-def create_record(receipt_no, name, count, date, price, table="Sale"):
+def create_record(receipt_no, name, count, date, price, lst, table="Sale"):
     query = f"insert into {table} values({receipt_no}, '{name}', {count}, '{date}', {price})"
     cur.execute(query)
+    cur.execute("use Sales")
+    lst = create_table(receipt_no, count)
+    create_records(lst, 't'+str(receipt_no))
+    cur.execute("use MedicalStore")
     conn.commit()
 
 
@@ -22,8 +26,6 @@ def create_records(records, table="Sale"):
 
 
 def create_table(receipt_no, count):
-    cur.execute("use Sales")
-    table = 't' + str(receipt_no)
 
     lst = []
 
@@ -43,8 +45,7 @@ def create_table(receipt_no, count):
 
         lst.append((bar, qty, price))
 
-    create_records(lst, table)
-    cur.execute("use MedicalStore")
+    return lst
 
 
 def view():
@@ -94,7 +95,18 @@ def view():
 
 
 def insert():
-    pass
+    print("Enter records")
+    receipt_no = input("Receipt no.: ")
+    receipt_nos = actions.get_values("Sale", "ReceiptNo")
+    check = [False, False]
+    while True:
+        if not receipt_no.isdigit():
+            check[0] = False
+        else:
+            check[0] = True
+
+    cust = input("Customer Name: ")
+    
 
 
 def delete():

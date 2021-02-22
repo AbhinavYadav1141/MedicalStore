@@ -2,7 +2,7 @@ from mysql.connector import connect
 import actions
 
 
-conn = connect(host='localhost', user='root', password='1234')
+conn = connect(host='localhost', user='root', password='abhinav1')
 cur = conn.cursor()
 cur.execute("use MedicalStore")
 
@@ -50,7 +50,7 @@ def view():
         actions.format_print(actions.get_columns("Stock"), actions.show_all("Stock"))
 
     elif ch == '3':
-        column = input("Which column do you want to use for record matching").lower()
+        column = input("Which column do you want to use for record matching: ").lower()
         columns = actions.get_columns("Stock")
         while column not in columns:
             column = input("Column you entered is not in table. Please enter again: ").lower()
