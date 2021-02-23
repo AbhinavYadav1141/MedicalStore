@@ -2,13 +2,14 @@ from mysql.connector import connect
 import medicine_info, sale, stock, management, initialize, actions
 
 
-conn = connect(user='root', passwd='abhinav1')
+conn = connect(user='root', passwd='1234')
 cur = conn.cursor()
 cur.execute("use MedicalStore")
 
 medicine_info.conn = sale.conn = stock.conn = management.conn = initialize.conn = actions.conn = conn
 medicine_info.cur = sale.cur = stock.cur = management.cur = initialize.cur = actions.cur = cur
 
+initialize.init()
 
 msg = """
 0: quit

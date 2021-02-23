@@ -1,10 +1,6 @@
 from mysql.connector import connect
 import actions
 
-conn = connect(host='localhost', user='root', password='abhinav1')
-cur = conn.cursor()
-cur.execute("use MedicalStore")
-
 
 def create_record(receipt_no, name, count, date, price, lst, table="Sale"):
     query = f"insert into {table} values({receipt_no}, '{name}', {count}, '{date}', {price})"
@@ -99,28 +95,11 @@ def insert():
     receipt_no = input("Receipt no.: ")
     receipt_nos = actions.get_values("Sale", "ReceiptNo")
     
-    while True:
-        check = [False, False]
+    while not receipt_no.isdigit() or receipt_no in receipt_nos:
         if not receipt_no.isdigit():
-            check[0] = False
+            receipt_no = input("Receipt no. should be an integer only! Enter again: ")
         else:
-            check[0] = True
-            
-        if receipt_no not in receipt_nos:
-            check[1] = True
-        else:
-            check[1] = False
-            
-        if check[0] and check[1]:
-            break
-        else:
-            if not check[0]:
-                print("Receipt No. should be an integer! Enter again: ", end='')
-            elif not check[1]:
-                print("Receipt No. is already taken! Enter different: ", end='')
-            else:
-                print("Receipt No. should be an integer and should be different every time! Enter again: ", end='')
-            receipt_no = input()
+            receipt_no = input("This receipt no. is already taken! Enter another: ")
 
     cust = input("Customer Name: ")
     while cust == '':
@@ -188,6 +167,10 @@ Enter Your Choice:
 """
 
 if __name__ == '__main__':
+    conn = connect(host='localhost', user='root', password='abhinav1')
+    cur = conn.cursor()
+    cur.execute("use MedicalStore")
+
     actions.conn = conn
     actions.cur = cur
     init()

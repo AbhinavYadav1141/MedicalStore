@@ -130,7 +130,7 @@ def get_values(table, column):
     val = cur.fetchall()
     values=[]
     for i in val:
-        values.append(i[0])
+        values.append(str(i[0]))
     return values
 
 

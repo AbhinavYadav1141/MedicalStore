@@ -2,8 +2,7 @@ from mysql.connector import connect
 
 
 def init():
-    conn = connect(host='localhost', user='root', password='abhinav1')
-    cur = conn.cursor()
+    
     queries = [
         "create database if not exists MedicalStore",
         "create database if not exists Sales",
@@ -25,4 +24,6 @@ def init():
 
 
 if __name__ == '__main__':
+    conn = connect(host='localhost', user='root', password='abhinav1')
+    cur = conn.cursor()
     init()

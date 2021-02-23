@@ -2,14 +2,6 @@ from mysql.connector import connect
 import actions
 
 
-conn = connect(host='localhost', user='root', password='abhinav1')
-cur = conn.cursor()
-cur.execute("use MedicalStore")
-
-actions.conn = conn
-actions.cur = cur
-
-
 def create_record(batch, bar, cost, date, qty_left, mfg, exp):
     query = f"insert into Stock values('{batch}', '{bar}', '{cost}', '{date}', {qty_left}, '{mfg}', '{exp}')"
     cur.execute(query)
@@ -327,6 +319,9 @@ Enter Your Choice:
 """
 
 if __name__ == '__main__':
+    conn = connect(host='localhost', user='root', password='abhinav1')
+    cur = conn.cursor()
+    cur.execute("use MedicalStore")
     actions.conn = conn
     actions.cur = cur
     init()
