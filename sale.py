@@ -1,18 +1,22 @@
-import traceback
-
 from mysql.connector import connect
 import actions
 import medicine_info
+import management
+
+months = {1: "January", 2: "February", 3: "March", 4: "April", 5: "May", 6: "June",
+          7: "July", 8: "August", 9: "September", 10: "October", 11: "November", 12: "December"}
 
 
-def create_record(receipt_no, name, count, date, time, price):
-    query = f"insert into Sale values('{receipt_no}', '{name}', '{count}', '{date}', '{time}', '{price}')"
+def create_record(receipt_no, name, count, date, time):
     barcodes = actions.get_values("MedicineInfo", "Barcode")
     cur.execute("use Sales")
     print("\nNow enter record for each medicine.")
-    create_table(receipt_no, count, barcodes)
+    cp, sp = create_table(receipt_no, count, barcodes)
+    query = f"insert into Sale values('{receipt_no}', '{name}', '{count}', '{date}', '{time}', '{cp}', '{sp}')"
     cur.execute("use MedicalStore")
     cur.execute(query)
+
+    management.update_record(months[int(date.split('-')[1])], date.split('-')[0], cp, sp)
     conn.commit()
 
 
@@ -32,12 +36,15 @@ def create_rec(table, sno, barcode, cp, sp):
 
 def create_table(receipt_no, count, barcodes):
     table = "t" + str(receipt_no)
-    cur.execute(f"create table if not exists {table} (SNo int, barcode int, CostPrice int, SellingPrice int, Profit int)")
+    cur.execute(f"""create table if not exists {table} 
+    (SNo int, barcode int, CostPrice int, SellingPrice int, Profit int)""")
+
+    total_cp = total_sp = 0
 
     for i in range(int(count)):
-        print(f"Enter record{i+1}")
+        print(f"Enter record{i + 1}")
 
-        sno = i+1
+        sno = i + 1
 
         barcode = input("Barcode: ")
 
@@ -45,7 +52,8 @@ def create_table(receipt_no, count, barcodes):
             if not barcode.isdigit():
                 barcode = input("Barcode should be an integer only! Enter again: ")
             else:
-                ch = input("""This barcode is not in the database!\nEnter 'y' to add it in database 'n' to continue: """).lower()
+                ch = input("""This barcode is not in the database!
+                Enter 'y' to add it in database, any other to continue: """).lower()
                 if ch == 'y':
                     medicine_info.insert(barcode)
                 break
@@ -64,18 +72,22 @@ def create_table(receipt_no, count, barcodes):
             sp = input("Selling Price should be an integer! Enter Again: ")
 
         create_rec(table, sno, barcode, cp, sp)
+        total_cp += int(cp)
+        total_sp += int(sp)
+    return total_cp, total_sp
 
 
 def print_format(receipt_no):
     print()
     print(f"ReceiptNo.: {receipt_no}")
     cur.execute(f"select * from Sale where ReceiptNo={receipt_no}")
-    _, name, count, date, time, price = cur.fetchall()[0]
+    _, name, count, date, time, cp, sp = cur.fetchall()[0]
     print(f"Customer Name: {name}")
     print(f"No. of medicines: {count}")
     print(f"Date: {date}")
     print(f"Time: {time}")
-    print(f"Total Price: {price}")
+    print(f"Cost Price: {cp}")
+    print(f"Selling Price: {sp}")
     print("Other info:")
 
     query = f"Select * from Sales.t{receipt_no}"
@@ -153,7 +165,7 @@ def view():
     records = []
     receipts = actions.get_values("Sale", "ReceiptNo")
     for i in range(int(num)):
-        rec = input(f"Enter record{i+1} Receipt No.: ")
+        rec = input(f"Enter record{i + 1} Receipt No.: ")
         while rec not in receipts or not rec.isdigit():
             if not rec.isdigit():
                 rec = input("Receipt No. should be an integer! Enter again: ")
@@ -168,7 +180,7 @@ def insert():
     print("Enter records")
     receipt_no = input("Receipt no.: ")
     receipt_nos = actions.get_values("Sale", "ReceiptNo")
-    
+
     while not receipt_no.isdigit() or receipt_no in receipt_nos:
         if not receipt_no.isdigit():
             receipt_no = input("Receipt no. should be an integer only! Enter again: ")
@@ -186,15 +198,11 @@ def insert():
     date = actions.date()
     time = actions.time()
 
-    price = input("Total Price: ")
-    while not price.isdigit():
-        price = input("Price should be an integer! Enter again: ")
-
-    create_record(receipt_no, cust, count, date, time, price)
+    create_record(receipt_no, cust, count, date, time)
 
 
 def delete():
-    receipt = input("Enter receipt no of record to be deleted: ")
+    receipt = input("Enter receipt no. of record to be deleted: ")
     while not receipt.isdigit():
         receipt = input("Receipt no. should be an integer! Enter Again: ")
 
@@ -203,6 +211,11 @@ def delete():
         print(f"Receipt No. {receipt} is not there! Skipping delete.")
 
     else:
+        cur.execute(f"select SellingPrice, CostPrice, SaleDate from Sale where ReceiptNo={receipt}")
+        sp, cp, date = cur.fetchall()[0]
+        month = months[int(date.split('-')[1])]
+        year = date.split[0]
+        management.update_record(month, year, -int(cp), -int(sp))
         cur.execute(f"delete from Sale where ReceiptNo='{receipt}'")
         cur.execute("use Sales")
         cur.execute(f"drop table t{receipt}")
@@ -219,6 +232,8 @@ def update():
 
     if receipt != '':
         cur.execute(f"update Sale set ReceiptNo={receipt} where ReceiptNo = {rec}")
+        cur.execute(f"alter table Sales.t{rec} rename t{receipt}")
+        rec = receipt
 
     name = input("Customer Name: ")
     if name != '':
@@ -232,6 +247,8 @@ def update():
         cur.execute(f"update Sale set TypeCount={count} where ReceiptNo = {rec}")
 
     date = input("Date (yyyy-mm-dd): ")
+    cur.execute(f"select SaleDate from Sale where ReceiptNo={rec}")
+    old_date = cur.fetchall()[0][0]
     while not actions.check_date(date) and date != '':
         date = input("Date you entered is not of correct format! Enter again: ")
 
@@ -245,16 +262,10 @@ def update():
     if time != '':
         cur.execute(f"update Sale set SaleTime={time} where ReceiptNo = {rec}")
 
-    price = input("Total Price: ")
-    while not price.isdigit() and price != '':
-        price = input("Price should be integer only! Enter again: ")
-
-    if price != '':
-        cur.execute(f"update Sale set SellingPrice={price}")
-
     ch = input("Enter 'y' if you want to change other info: ").lower()
 
     if ch == 'y':
+        total_cp = total_sp = 0
         while True:
             bar = input("Enter barcode of medicine you want to update. Leave empty to quit: ").lower()
             if bar == '':
@@ -267,22 +278,34 @@ def update():
             while not barcode.isdigit() and barcode != '':
                 barcode = input("Barcode should be an integer! Enter again: ")
             if barcode != '':
-                cur.execute(f"update Sale set Barcode={barcode} where Barcode={bar}")
+                cur.execute(f"update t{receipt} set Barcode={barcode} where Barcode={bar}")
+            if barcode == '':
+                barcode = bar
 
             cp = input("Cost Price: ")
             while not cp.isdigit() and cp != '':
                 cp = input("Cost Price should be an integer! Enter again: ")
 
             if cp != '':
-                cur.execute(f"update Sale set CostPrice={cp} where Barcode={bar}")
+                cur.execute(f"select CostPrice from t{receipt} where Barcode={barcode}")
+                old_cp = cur.fetchall()[0][0]
+                cur.execute(f"update t{receipt} set CostPrice={cp} where Barcode={barcode}")
+                total_cp += int(cp) - int(old_cp)
 
             sp = input("Selling Price: ")
             while not sp.isdigit() and sp != '':
                 sp = input("Selling Price should be an integer! Enter again: ")
 
             if sp != '':
-                cur.execute(f"update Sale set SellingPrice={sp} where Barcode={bar}")
+                cur.execute(f"select SellingPrice from t{receipt} where Barcode={barcode}")
+                old_sp = cur.fetchall()[0][0]
+                cur.execute(f"update t{receipt} set SellingPrice={sp} where Barcode={barcode}")
+                total_sp += int(sp) - int(old_sp)
             print("Record Updated..")
+
+        month = months[int(old_date.split('-')[1])]
+        year = old_date.split('-')[0]
+        management.update_record(month, year, total_cp, total_sp)
 
 
 def search():
