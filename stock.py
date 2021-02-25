@@ -3,6 +3,7 @@ import actions
 
 
 def create_record(batch, bar, cost, date, qty_left, mfg, exp):
+    date, mfg, exp = actions.date_format(date, mfg, exp)
     query = f"insert into Stock values('{batch}', '{bar}', '{cost}', '{date}', {qty_left}, '{mfg}', '{exp}')"
     cur.execute(query)
     conn.commit()
@@ -69,72 +70,41 @@ def view():
 
 def insert():
     print()
-    print("Insert Options:")
-    print("2. Enter values separately")
-    print("3. Enter many records at once")
-    print("0. Home")
-    print("1. Stock Information")
+    print("Enter Records")
 
-    ch = input("Enter your choice: ")
-    while ch not in '0123' or len(ch) != 1:
-        ch = input("Invalid choice! Please Enter again: ")
+    batch = input("Batch No.: ")
+    while not batch.isdigit():
+        batch = input("Batch No. should be an integer only. Please enter again: ")
 
-    if ch == '0':
-        return '0'
+    bar = input("Barcode of medicine: ")
+    while not bar.isdigit():
+        bar = input("Barcode should be an integer only! Please enter again: ")
 
-    elif ch == '1':
-        return '1'
+    cp = input("Enter Cost per packet (Rs): ")
+    while not cp.isdigit():
+        cp = "Cost should be an integer! Please enter again: "
 
-    elif ch == '2':
-        print("Enter Records")
-        batch = input("Batch No.: ")
-        while not batch.isdigit():
-            batch = input("Batch No. should be an integer only. Please enter again: ")
+    p_date = input("Purchase date (yyyy-mm-dd): ")
+    while not actions.check_date(p_date):
+        p_date = input("Your date format is nor correct! Enter again(yyyy-mm-dd): ")
 
-        bar = input("Barcode of medicine: ")
-        while not bar.isdigit():
-            bar = input("Barcode should be an integer only! Please enter again: ")
+    qty = input("Quantity left (no. of packets): ")
+    while not qty.isdigit():
+        qty = input("Quantity should be an integer only! Please enter again: ")
 
-        cp = input("Enter Cost per packet (Rs): ")
-        while not cp.isdigit():
-            cp = "Cost should be an integer! Please enter again: "
+    mfg = input("Manufacturing date: ")
+    while not actions.check_date(mfg):
+        mfg = input("Your date format is nor correct! Enter again(yyyy-mm-dd): ")
 
-        p_date = input("Purchase date (yyyy-mm-dd): ")
+    exp = input("Expiry date: ")
+    while not actions.check_date(exp):
+        exp = input("Your date format is nor correct! Enter again(yyyy-mm-dd): ")
 
-        qty = input("Quantity left (no. of packets): ")
-        while not qty.isdigit():
-            qty = input("Quantity should be an integer only! Please enter again: ")
-
-        mfg = input("Manufacturing date: ")
-
-        exp = input("Expiry date: ")
-
-        try:
-            create_record(batch, bar, cp, p_date, qty, mfg, exp)
-        except Exception as e:
-            print("An Error Occurred!!")
-            print(e)
-
-    elif ch == '3':
-        num = input("How many records do you want to create: ")
-        while not num.isdigit():
-            num = input("No. of records should be an integer only! Enter again: ")
-
-        records = []
-        print("Columns are: ")
-        print(actions.get_columns("Stock"))
-        for i in range(int(num)):
-            record = input("Enter values separated with semicolon(;): ").split(';')
-
-            while len(record) != actions.column_count("Stock"):
-                record = input("No. of records you entered is not equal to no. of columns! Enter again: ").split(';')
-
-            records.append(record)
-        try:
-            create_records(records)
-        except Exception as e:
-            print("An Error Occurred: ")
-            print(e)
+    try:
+        create_record(batch, bar, cp, p_date, qty, mfg, exp)
+    except Exception as e:
+        print("An Error Occurred!!")
+        print(e)
 
 
 def delete():

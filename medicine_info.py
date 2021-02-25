@@ -66,16 +66,17 @@ def view():
         actions.format_print(columns, actions.search_multiple("medicineInfo", column, records, columns))
 
 
-def insert():
+def insert(bar=None):
     print()
-    bar = input("Enter barcode of medicine: ")
-    bars = actions.get_values("MedicineInfo", "Barcode")
-    
-    while not  bar.isdigit() or  bar in  bars:
-        if not  bar.isdigit():
-             bar = input(" Barcode should be an integer only! Enter again: ")
-        else:
-             bar = input("This  barcode is already taken! Enter another: ")
+    if bar is None:
+        bar = input("Enter barcode of medicine: ")
+        bars = actions.get_values("MedicineInfo", "Barcode")
+
+        while not bar.isdigit() or bar in bars:
+            if not bar.isdigit():
+                bar = input(" Barcode should be an integer only! Enter again: ")
+            else:
+                bar = input("This  barcode is already taken! Enter another: ")
 
     name = input("Enter name of medicine: ")
     while name == '':

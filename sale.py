@@ -1,62 +1,120 @@
+import traceback
+
 from mysql.connector import connect
 import actions
+import medicine_info
 
 
-def create_record(receipt_no, name, count, date, price, lst, table="Sale"):
-    query = f"insert into {table} values({receipt_no}, '{name}', {count}, '{date}', {price})"
-    cur.execute(query)
+def create_record(receipt_no, name, count, date, time, price):
+    query = f"insert into Sale values('{receipt_no}', '{name}', '{count}', '{date}', '{time}', '{price}')"
+    barcodes = actions.get_values("MedicineInfo", "Barcode")
     cur.execute("use Sales")
-    lst = create_table(receipt_no, count)
-    create_records(lst, 't'+str(receipt_no))
+    print("\nNow enter record for each medicine.")
+    create_table(receipt_no, count, barcodes)
     cur.execute("use MedicalStore")
+    cur.execute(query)
     conn.commit()
 
 
-def create_record_from_list(lst, table="Sale"):
-    create_record(lst[0], lst[1], lst[2], lst[3], lst[5], table)
+def create_record_from_list(lst):
+    create_record(*lst)
 
 
-def create_records(records, table="Sale"):
+def create_records(records):
     for i in records:
-        create_record_from_list(i, table)
+        create_record_from_list(i)
 
 
-def create_table(receipt_no, count):
+def create_rec(table, sno, barcode, cp, sp):
+    cur.execute(f"insert into {table} values('{sno}', '{barcode}', '{cp}', '{sp}', '{int(sp) - int(cp)}')")
+    conn.commit()
 
-    lst = []
 
-    for i in range(count):
-        print(f"\nRecord{i+1}")
-        bar = input("Enter medicine barcode: ")
-        while not bar.isdigit():
-            bar = input("Barcode should be an integer. Please enter again: ")
+def create_table(receipt_no, count, barcodes):
+    table = "t" + str(receipt_no)
+    cur.execute(f"create table if not exists {table} (SNo int, barcode int, CostPrice int, SellingPrice int, Profit int)")
 
-        qty = input("Enter no. of tablets(or bottles) sold: ")
-        while not qty.isdigit():
-            qty = input("No. of tablets should be an integer. Please enter again: ")
+    for i in range(int(count)):
+        print(f"Enter record{i+1}")
 
-        price = input("Enter price of medicine: ")
-        while not price.isdigit():
-            price = input("Price should be an integer. Please enter again: ")
+        sno = i+1
 
-        lst.append((bar, qty, price))
+        barcode = input("Barcode: ")
 
-    return lst
+        while barcode not in barcodes or not barcode.isdigit():
+            if not barcode.isdigit():
+                barcode = input("Barcode should be an integer only! Enter again: ")
+            else:
+                ch = input("""This barcode is not in the database!\nEnter 'y' to add it in database 'n' to continue: """).lower()
+                if ch == 'y':
+                    medicine_info.insert(barcode)
+                break
+
+        cur.execute(f"select CostPrice from MedicalStore.Stock where Barcode={barcode}")
+        cps = cur.fetchall()
+        if len(cps) == 0:
+            cp = input("Cost Price: ")
+            while not cp.isdigit():
+                cp = input("Cost Price should be an integer! Enter again: ")
+        else:
+            cp = cps[0][0]
+
+        sp = input("Selling Price: ")
+        while not sp.isdigit():
+            sp = input("Selling Price should be an integer! Enter Again: ")
+
+        create_rec(table, sno, barcode, cp, sp)
+
+
+def print_format(receipt_no):
+    print()
+    print(f"ReceiptNo.: {receipt_no}")
+    cur.execute(f"select * from Sale where ReceiptNo={receipt_no}")
+    _, name, count, date, time, price = cur.fetchall()[0]
+    print(f"Customer Name: {name}")
+    print(f"No. of medicines: {count}")
+    print(f"Date: {date}")
+    print(f"Time: {time}")
+    print(f"Total Price: {price}")
+    print("Other info:")
+
+    query = f"Select * from Sales.t{receipt_no}"
+    columns = actions.get_columns(f"Sales.t{receipt_no}")
+    a = 1
+
+    bm = actions.get_values("MedicineInfo", "Barcode")
+
+    for i in actions.get_values(f"Sales.t{receipt_no}", "Barcode"):
+        if i not in bm:
+            a = 0
+
+    if a:
+        query = f"""select t.SNo, t.Barcode, m.Name, m.Type, m.Composition, t.CostPrice, t.SellingPrice, t.Profit
+        from t{receipt_no} as t, MedicalStore.MedicineInfo as m where t.Barcode=m.barcode"""
+        columns = ("SNo", "Barcode", "Name", "Type", "Composition", "CostPrice", "SellingPrice", "Profit")
+
+    cur.execute("use Sales")
+    cur.execute(query)
+    actions.format_print(columns, cur.fetchall())
+    cur.execute("Use MedicalStore")
 
 
 def view():
     print()
-    print("How many columns do you want to view:")
-    print("2: All columns, All records")
-    print("3: All columns, Some records")
-    print("4: Some columns, All records")
-    print("5: Some columns, Some records")
+    print("Viewing Options:")
+    print("2: All data")
+    print("3: One record using Receipt No.")
+    print("4: many records using Receipt No.")
+    print("5: All Receipt Numbers")
+    print("6: Receipt numbers by condition")
     print("0: Go to home")
     print("1: Go to Medicine Information")
     ch = input()
 
-    while ch not in '012345' or len(ch) != 1:
+    while ch not in '0123456' or len(ch) != 1:
         ch = input("Invalid choice. Enter again: ")
+
+    num = 0
 
     if ch == '0':
         return '0'
@@ -65,29 +123,45 @@ def view():
         return '1'
 
     elif ch == '2':
-        actions.format_print(actions.get_columns("Sale"), actions.show_all("Sale"))
+        values = actions.get_values("Sale", "ReceiptNo")
+        for i in values:
+            print_format(i)
+        if len(values) == 0:
+            print("No records!!")
 
     elif ch == '3':
-        column = input("Which column do you want to use for record matching").lower()
-        columns = actions.get_columns("Sale")
-        while column not in columns:
-            print(f"Valid Columns: {columns}")
-            column = input("Column you entered is not in table. Please enter again: ").lower()
-        records = actions.input_rows()
-        actions.format_print(columns, actions.search_multiple("Sale", column, records))
+        num = 1
 
     elif ch == '4':
-        clm = actions.input_cols("Sale")
-        actions.format_print(clm, actions.show_columns("Sale", clm))
+        num = input("How many records do tou want to view: ")
+        while not num.isdigit():
+            num = input("No. of records should be integer only! Enter again: ")
 
     elif ch == '5':
-        columns = actions.input_cols("Sale")
-        column = input("Which column do you want to use for record matching")
-        columns_all = actions.get_columns("Sale")
-        while column not in columns_all:
-            column = input("Column you entered is not in table. Please enter again: ")
-        records = actions.input_rows()
-        actions.format_print(columns, actions.search_multiple("Sale", column, records, columns))
+        cur.execute("select ReceiptNo from Sale")
+        actions.format_print(["ReceiptNo", ], cur.fetchall())
+
+    elif ch == '6':
+        condition = input("Enter condition: ")
+        try:
+            cur.execute(f"select ReceiptNo from Sale where {condition}")
+            actions.format_print(["ReceiptNo"], cur.fetchall())
+        except Exception as e:
+            print("Your condition had an error!!")
+            print(e)
+
+    records = []
+    receipts = actions.get_values("Sale", "ReceiptNo")
+    for i in range(int(num)):
+        rec = input(f"Enter record{i+1} Receipt No.: ")
+        while rec not in receipts or not rec.isdigit():
+            if not rec.isdigit():
+                rec = input("Receipt No. should be an integer! Enter again: ")
+            else:
+                rec = input(f"Receipt No.: {rec} is not there! Enter again: ")
+        records.append(rec)
+    for i in records:
+        print_format(i)
 
 
 def insert():
@@ -105,17 +179,188 @@ def insert():
     while cust == '':
         cust = input("Customer name cannot be empty! Enter a name: ")
 
+    count = input("No. of medicines sold: ")
+    while not count.isdigit():
+        count = input("No. of medicines should be integer! Enter again: ")
+
+    date = actions.date()
+    time = actions.time()
+
+    price = input("Total Price: ")
+    while not price.isdigit():
+        price = input("Price should be an integer! Enter again: ")
+
+    create_record(receipt_no, cust, count, date, time, price)
+
 
 def delete():
-    pass
+    receipt = input("Enter receipt no of record to be deleted: ")
+    while not receipt.isdigit():
+        receipt = input("Receipt no. should be an integer! Enter Again: ")
+
+    receipts = actions.get_values("Sale", "ReceiptNo")
+    if receipt not in receipts:
+        print(f"Receipt No. {receipt} is not there! Skipping delete.")
+
+    else:
+        cur.execute(f"delete from Sale where ReceiptNo='{receipt}'")
+        cur.execute("use Sales")
+        cur.execute(f"drop table t{receipt}")
+        cur.execute("use MedicalStore")
+        conn.commit()
 
 
 def update():
-    pass
+    rec = input("Enter receipt no. of record to be updated: ")
+    print("Enter new records. Leave blank to not update")
+    receipt = input("Receipt No.: ")
+    while receipt != '' and not receipt.isdigit():
+        receipt = input("Receipt no. should be an integer! Enter again: ")
+
+    if receipt != '':
+        cur.execute(f"update Sale set ReceiptNo={receipt} where ReceiptNo = {rec}")
+
+    name = input("Customer Name: ")
+    if name != '':
+        cur.execute(f"update Sale set name={name} where ReceiptNo = {rec}")
+
+    count = input("No. of medicines sold: ")
+    while count != '' and not count.isdigit():
+        count = input("No. of medicines should be an integer! Enter again: ")
+
+    if count != '':
+        cur.execute(f"update Sale set TypeCount={count} where ReceiptNo = {rec}")
+
+    date = input("Date (yyyy-mm-dd): ")
+    while not actions.check_date(date) and date != '':
+        date = input("Date you entered is not of correct format! Enter again: ")
+
+    if date != '':
+        cur.execute(f"update Sale set SaleDate={date} where ReceiptNo = {rec}")
+
+    time = input("Time (hh:mm:ss)")
+    while not actions.check_time(time) and time != '':
+        time = input("Time you entered is not of correct format! Enter again: ")
+
+    if time != '':
+        cur.execute(f"update Sale set SaleTime={time} where ReceiptNo = {rec}")
+
+    price = input("Total Price: ")
+    while not price.isdigit() and price != '':
+        price = input("Price should be integer only! Enter again: ")
+
+    if price != '':
+        cur.execute(f"update Sale set SellingPrice={price}")
+
+    ch = input("Enter 'y' if you want to change other info: ").lower()
+
+    if ch == 'y':
+        while True:
+            bar = input("Enter barcode of medicine you want to update. Leave empty to quit: ").lower()
+            if bar == '':
+                break
+            if not bar.isdigit():
+                bar = input("Barcode should be an integer! Enter again: ")
+
+            print("\nEnter new records. Leave empty to not update.")
+            barcode = input("Barcode: ")
+            while not barcode.isdigit() and barcode != '':
+                barcode = input("Barcode should be an integer! Enter again: ")
+            if barcode != '':
+                cur.execute(f"update Sale set Barcode={barcode} where Barcode={bar}")
+
+            cp = input("Cost Price: ")
+            while not cp.isdigit() and cp != '':
+                cp = input("Cost Price should be an integer! Enter again: ")
+
+            if cp != '':
+                cur.execute(f"update Sale set CostPrice={cp} where Barcode={bar}")
+
+            sp = input("Selling Price: ")
+            while not sp.isdigit() and sp != '':
+                sp = input("Selling Price should be an integer! Enter again: ")
+
+            if sp != '':
+                cur.execute(f"update Sale set SellingPrice={sp} where Barcode={bar}")
+            print("Record Updated..")
 
 
 def search():
-    pass
+    print("Search options:")
+    print("2: Using Receipt No.")
+    print("3: Using Customer Name")
+    print("4: Using Date range")
+    print("5: Using Time range")
+    print("6: Using date and time ranges")
+    print("0: Home")
+    print("1: Sale Information")
+
+    ch = input("Enter your choice: ")
+
+    while ch not in '0123456' or len(ch) != 1:
+        ch = input("Invalid choice! Enter again: ")
+
+    if ch == '0':
+        return '0'
+
+    elif ch == '1':
+        return '1'
+
+    elif ch == '2':
+        receipt = input("Enter Receipt No.: ")
+        while not receipt.isdigit():
+            receipt = input("Receipt No. should be an integer! Enter again: ")
+
+        print_format(receipt)
+
+    elif ch == '3':
+        name = input("Enter Customer Name: ")
+        actions.format_print(actions.get_columns("Sale"), actions.search("Sale", "CustomerName", name, "="))
+
+    elif ch == '4':
+        start = input("Enter starting date(yyyy-mm-dd): ")
+        while not actions.check_date(start):
+            start = input("Date you entered is not of correct format! Enter again(yyyy-mm-dd): ")
+
+        end = input("Enter ending date(yyyy-mm-dd): ")
+        while not actions.check_date(end):
+            end = input("Date you entered is not of correct format! Enter again(yyyy-mm-dd): ")
+
+        actions.format_print(actions.get_columns("Sale"),
+                             actions.search_by_condition("Sale", f"'{end}'>=SaleDate and SaleDate>='{start}'"))
+
+    elif ch == '5':
+        start = input("Enter starting time(hh:mm:ss): ")
+        while not actions.check_time(start):
+            start = input("Time you entered is not of correct format! Enter again(hh:mm:ss): ")
+
+        end = input("Enter ending time(hh:mm:ss): ")
+        while not actions.check_time(end):
+            end = input("Time you entered is not of correct format! Enter again(hh:mm:ss): ")
+
+        actions.format_print(actions.get_columns("Sale"),
+                             actions.search_by_condition("Sale", f"'{end}'>=SaleTime and SaleTime>='{start}'"))
+
+    elif ch == '6':
+        start1 = input("Enter starting date(yyyy-mm-dd): ")
+        while not actions.check_date(start1):
+            start1 = input("Date you entered is not of correct format! Enter again(yyyy-mm-dd): ")
+
+        end1 = input("Enter ending date(yyyy-mm-dd): ")
+        while not actions.check_date(end1):
+            end1 = input("Date you entered is not of correct format! Enter again(yyyy-mm-dd): ")
+
+        start2 = input("Enter starting time(hh:mm:ss): ")
+        while not actions.check_time(start2):
+            start2 = input("Time you entered is not of correct format! Enter again(hh:mm:ss): ")
+
+        end2 = input("Enter ending time(hh:mm:ss): ")
+        while not actions.check_time(end2):
+            end2 = input("Time you entered is not of correct format! Enter again(hh:mm:ss): ")
+
+        actions.format_print(actions.get_columns("Sale"),
+                             actions.search_by_condition("Sale", f"""'{end2}'>=SaleTime and SaleTime>='{start2}' and 
+                             '{end1}'>=SaleDate and SaleDate>='{start1}'"""))
 
 
 def init():
@@ -136,13 +381,13 @@ def init():
                 code = view()
 
             elif ch == '2':
-                code = insert()
+                insert()
 
             elif ch == '3':
-                code = delete()
+                delete()
 
             elif ch == '4':
-                code = update()
+                update()
 
             elif ch == '5':
                 code = search()

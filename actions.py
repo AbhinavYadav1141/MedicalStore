@@ -1,7 +1,5 @@
 from mysql.connector import connect
 
-conn = cur = None
-
 
 def delete_record(table, column, value):
     cur.execute(f"delete from {table} where {column}={value}")
@@ -24,10 +22,8 @@ def search_by_condition(table, condition, sel_col='*'):
     return result
 
 
-def search(table, column, value, operator):
-    if isinstance(value, int):
-        return search_by_condition(table, f"{column} {operator} {value}")
-    return search_by_condition(table, f"{column} {operator} '{value}'")
+def search(table, column, value, operator, sel_col='*'):
+    return search_by_condition(table, f"{column} {operator} '{value}'", sel_col)
 
 
 def search_multiple(table, column, values: list, sel_col='*', operator='='):
@@ -48,7 +44,8 @@ def sysdate():
 
 
 def date():
-    return sysdate()[0]
+    d = sysdate()[0]
+    return d
 
 
 def time():
@@ -62,8 +59,8 @@ def show_all(table):
 
 def show_columns(table, columns):
     query = "select "
-    for i in range(len(columns)-1):
-        query += columns[i]+', '
+    for i in range(len(columns) - 1):
+        query += columns[i] + ', '
     query += columns[-1] + f' from {table}'
     # print(query)
     cur.execute(query)
@@ -87,7 +84,7 @@ def format_print(columns, values):
         print("+")
 
         for i in columns:
-            print("|", i.upper(), " "*(sizes[i] - len(str(i))), end='  ', sep='')
+            print("|", i, " " * (sizes[i] - len(str(i))), end='  ', sep='')
         print("|")
 
         for i in sizes:
@@ -97,7 +94,7 @@ def format_print(columns, values):
 
         for i in values:
             for j in range(len(i)):
-                print("|", i[j], " "*(sizes[columns[j]] - len(str(i[j]))), end='  ', sep='')
+                print("|", i[j], " " * (sizes[columns[j]] - len(str(i[j]))), end='  ', sep='')
             print("|")
 
         for i in sizes:
@@ -107,6 +104,8 @@ def format_print(columns, values):
 
     else:
         print("No records!")
+
+    return sizes
 
 
 def update(table, column, value, condition):
@@ -123,12 +122,12 @@ def get_columns(table):
         columns.append(i[0].lower())
 
     return columns
-    
-    
+
+
 def get_values(table, column):
     cur.execute(f"select {column} from {table}")
     val = cur.fetchall()
-    values=[]
+    values = []
     for i in val:
         values.append(str(i[0]))
     return values
@@ -164,3 +163,43 @@ def input_rows():
         record = input(f'Enter record{i + 1}: ')
         records.append(record)
     return records
+
+
+def date_format(*args):
+    args = list(args)
+    for i in range(len(args)):
+        if '/' in args[i]:
+            args[i] = args[i].replace('/', '-')
+
+    return tuple(args)
+
+
+def check_date(date: str):
+    if date.count('-') != 2:
+        return False
+    if not date.replace('-', '0').isdigit():
+        return False
+    date = date.split('-')
+
+    if len(date[0]) != 4 or len(date[1]) != 2 or len(date[2]) != 2:
+        return False
+    return True
+
+
+def check_time(t: str):
+    if t.count(':') != 2:
+        return False
+    if not t.replace(':', '0').isdigit():
+        return False
+
+    t = t.split(":")
+    if len(t[0]) == len(t[1]) == len(t[2]) == 2:
+        return True
+
+    return False
+
+
+if __name__ == '__main__':
+    conn = connect(user='root', passwd='abhinav1')
+    cur = conn.cursor()
+    cur.execute("use MedicalStore")
