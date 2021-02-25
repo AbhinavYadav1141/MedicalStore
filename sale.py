@@ -213,6 +213,7 @@ def delete():
     else:
         cur.execute(f"select SellingPrice, CostPrice, SaleDate from Sale where ReceiptNo={receipt}")
         sp, cp, date = cur.fetchall()[0]
+        date = str(date.isoformat())
         month = months[int(date.split('-')[1])]
         year = date.split[0]
         management.update_record(month, year, -int(cp), -int(sp))
