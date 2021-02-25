@@ -2,10 +2,6 @@ from mysql.connector import connect
 import actions
 
 
-conn = connect(host='localhost', user='root', password='1234')
-cur = conn.cursor()
-
-
 def create_record(month, year, cost, sell, net=None):
     if net is None:
         net = sell - cost
@@ -26,3 +22,9 @@ def create_records(records):
 
 def init():
     pass
+
+
+if __name__ == "__main__":
+    conn = connect(host='localhost', user='root', password='abhinav1')
+    cur = conn.cursor()
+    init()

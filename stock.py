@@ -2,12 +2,8 @@ from mysql.connector import connect
 import actions
 
 
-conn = connect(host='localhost', user='root', password='1234')
-cur = conn.cursor()
-
-
 def create_record(batch, bar, cost, date, qty_left, mfg, exp):
-    query = f"insert into Stock values('{batch}', '{bar}', '{cost}', '{date}', {qty_left}, '{mfg}'. '{exp}')"
+    query = f"insert into Stock values('{batch}', '{bar}', '{cost}', '{date}', {qty_left}, '{mfg}', '{exp}')"
     cur.execute(query)
     conn.commit()
 
@@ -46,7 +42,7 @@ def view():
         actions.format_print(actions.get_columns("Stock"), actions.show_all("Stock"))
 
     elif ch == '3':
-        column = input("Which column do you want to use for record matching").lower()
+        column = input("Which column do you want to use for record matching: ").lower()
         columns = actions.get_columns("Stock")
         while column not in columns:
             column = input("Column you entered is not in table. Please enter again: ").lower()
@@ -125,6 +121,8 @@ def insert():
             num = input("No. of records should be an integer only! Enter again: ")
 
         records = []
+        print("Columns are: ")
+        print(actions.get_columns("Stock"))
         for i in range(int(num)):
             record = input("Enter values separated with semicolon(;): ").split(';')
 
@@ -311,16 +309,19 @@ def init():
 
 msg = """
 
-    Enter Your Choice:
-    0: Home
-    1: View Stock Information
-    2: Insert records
-    3: Delete records
-    4: Update record
-    5: Search records
-    """
+Enter Your Choice:
+0: Home
+1: View Stock Information
+2: Insert records
+3: Delete records
+4: Update record
+5: Search records
+"""
 
 if __name__ == '__main__':
+    conn = connect(host='localhost', user='root', password='abhinav1')
+    cur = conn.cursor()
+    cur.execute("use MedicalStore")
     actions.conn = conn
     actions.cur = cur
     init()

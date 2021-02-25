@@ -1,14 +1,14 @@
 from mysql.connector import connect
 import actions
 
-conn = connect(host='localhost', user='root', password='abhinav1')
-cur = conn.cursor()
-cur.execute("use MedicalStore")
 
-
-def create_record(receipt_no, name, count, date, price, table="Sale"):
+def create_record(receipt_no, name, count, date, price, lst, table="Sale"):
     query = f"insert into {table} values({receipt_no}, '{name}', {count}, '{date}', {price})"
     cur.execute(query)
+    cur.execute("use Sales")
+    lst = create_table(receipt_no, count)
+    create_records(lst, 't'+str(receipt_no))
+    cur.execute("use MedicalStore")
     conn.commit()
 
 
@@ -22,8 +22,6 @@ def create_records(records, table="Sale"):
 
 
 def create_table(receipt_no, count):
-    cur.execute("use Sales")
-    table = 't' + str(receipt_no)
 
     lst = []
 
@@ -43,8 +41,7 @@ def create_table(receipt_no, count):
 
         lst.append((bar, qty, price))
 
-    create_records(lst, table)
-    cur.execute("use MedicalStore")
+    return lst
 
 
 def view():
@@ -94,7 +91,19 @@ def view():
 
 
 def insert():
-    pass
+    print("Enter records")
+    receipt_no = input("Receipt no.: ")
+    receipt_nos = actions.get_values("Sale", "ReceiptNo")
+    
+    while not receipt_no.isdigit() or receipt_no in receipt_nos:
+        if not receipt_no.isdigit():
+            receipt_no = input("Receipt no. should be an integer only! Enter again: ")
+        else:
+            receipt_no = input("This receipt no. is already taken! Enter another: ")
+
+    cust = input("Customer Name: ")
+    while cust == '':
+        cust = input("Customer name cannot be empty! Enter a name: ")
 
 
 def delete():
@@ -158,6 +167,10 @@ Enter Your Choice:
 """
 
 if __name__ == '__main__':
+    conn = connect(host='localhost', user='root', password='abhinav1')
+    cur = conn.cursor()
+    cur.execute("use MedicalStore")
+
     actions.conn = conn
     actions.cur = cur
     init()

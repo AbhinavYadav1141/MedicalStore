@@ -1,10 +1,6 @@
 from mysql.connector import connect
 import actions
 
-conn = connect(host='localhost', user='root', password='abhinav1')
-cur = conn.cursor()
-cur.execute("use MedicalStore")
-
 
 def create_record(barcode, name, m_type, composition):
     if composition == "NULL":
@@ -49,7 +45,7 @@ def view():
         actions.format_print(actions.get_columns("MedicineInfo"), actions.show_all("MedicineInfo"))
 
     elif ch == '3':
-        column = input("Which column do you want to use for record matching").lower()
+        column = input("Which column do you want to use for record matching: ").lower()
         columns = actions.get_columns("MedicineInfo")
         while column not in columns:
             column = input("Column you entered is not in table. Please enter again: ").lower()
@@ -73,8 +69,13 @@ def view():
 def insert():
     print()
     bar = input("Enter barcode of medicine: ")
-    while not bar.isdigit():
-        bar = input("Barcode should be integer. Please enter again: ")
+    bars = actions.get_values("MedicineInfo", "Barcode")
+    
+    while not  bar.isdigit() or  bar in  bars:
+        if not  bar.isdigit():
+             bar = input(" Barcode should be an integer only! Enter again: ")
+        else:
+             bar = input("This  barcode is already taken! Enter another: ")
 
     name = input("Enter name of medicine: ")
     while name == '':
@@ -288,6 +289,9 @@ Enter Your Choice:
 """
 
 if __name__ == '__main__':
+    conn = connect(host='localhost', user='root', password='abhinav1')
+    cur = conn.cursor()
+    cur.execute("use MedicalStore")
     actions.conn = conn
     actions.cur = cur
     init()

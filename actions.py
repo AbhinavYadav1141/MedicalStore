@@ -71,10 +71,10 @@ def show_columns(table, columns):
 
 
 def format_print(columns, values):
-    sizes = {}
+    sizes = {i: len(i) for i in columns}
     if len(values) > 0:
         for i in range(len(columns)):
-            longest = 0
+            longest = sizes[columns[i]]
             for j in values:
                 j = j[i]
                 if len(str(j)) > longest:
@@ -83,26 +83,26 @@ def format_print(columns, values):
 
         for i in sizes:
             print("+", end='')
-            print("-" * (sizes[i] + 4), end='')
+            print("-" * (sizes[i] + 2), end='')
         print("+")
 
         for i in columns:
-            print("|", i.upper(), " "*(sizes[i] - len(str(i))), end='    ', sep='')
+            print("|", i.upper(), " "*(sizes[i] - len(str(i))), end='  ', sep='')
         print("|")
 
         for i in sizes:
             print("+", end='')
-            print("-" * (sizes[i] + 4), end='')
+            print("-" * (sizes[i] + 2), end='')
         print("+")
 
         for i in values:
             for j in range(len(i)):
-                print("|", i[j], " "*(sizes[columns[j]] - len(str(i[j]))), end='    ', sep='')
+                print("|", i[j], " "*(sizes[columns[j]] - len(str(i[j]))), end='  ', sep='')
             print("|")
 
         for i in sizes:
             print("+", end='')
-            print("-" * (sizes[i] + 4), end='')
+            print("-" * (sizes[i] + 2), end='')
         print("+")
 
     else:
@@ -123,6 +123,15 @@ def get_columns(table):
         columns.append(i[0].lower())
 
     return columns
+    
+    
+def get_values(table, column):
+    cur.execute(f"select {column} from {table}")
+    val = cur.fetchall()
+    values=[]
+    for i in val:
+        values.append(str(i[0]))
+    return values
 
 
 def column_count(table):
