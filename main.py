@@ -1,6 +1,10 @@
 from mysql.connector import connect
-import medicine_info, sale, stock, management, initialize, actions
-
+import actions
+import initialize
+import management
+import medicine_info
+import sale
+import stock
 
 conn = connect(user='root', passwd='abhinav1')
 cur = conn.cursor()
