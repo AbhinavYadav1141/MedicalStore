@@ -42,6 +42,7 @@ def create_table(receipt_no, count, barcodes):
     total_cp = total_sp = 0
 
     for i in range(int(count)):
+        print()
         print(f"Enter record{i + 1}")
 
         sno = i + 1
@@ -55,7 +56,10 @@ def create_table(receipt_no, count, barcodes):
                 ch = input("""This barcode is not in the database!
                 Enter 'y' to add it in database, any other to continue: """).lower()
                 if ch == 'y':
+                    cur.execute("use MedicalStore")
                     medicine_info.insert(barcode)
+                    print()
+                    cur.execute("use Sales")
                 break
 
         cur.execute(f"select CostPrice from MedicalStore.Stock where Barcode={barcode}")
@@ -215,7 +219,7 @@ def delete():
         sp, cp, date = cur.fetchall()[0]
         date = str(date.isoformat())
         month = months[int(date.split('-')[1])]
-        year = date.split[0]
+        year = date.split()[0]
         management.update_record(month, year, -int(cp), -int(sp))
         cur.execute(f"delete from Sale where ReceiptNo='{receipt}'")
         cur.execute("use Sales")

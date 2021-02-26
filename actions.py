@@ -2,7 +2,7 @@ from mysql.connector import connect
 
 
 def delete_record(table, column, value):
-    cur.execute(f"delete from {table} where {column}={value}")
+    cur.execute(f"delete from {table} where {column}='{value}'")
     conn.commit()
 
 

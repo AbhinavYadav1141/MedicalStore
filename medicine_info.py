@@ -63,7 +63,9 @@ def view():
         while column not in columns_all:
             column = input("Column you entered is not in table. Please enter again: ").lower()
         records = actions.input_rows()
-        actions.format_print(columns, actions.search_multiple("medicineInfo", column, records, columns))
+        actions.format_print(columns, actions.search_multiple("MedicineInfo", column, records,
+                                                              str(columns).lstrip('[').rstrip(']').replace("'", '')
+                                                              ))
 
 
 def insert(bar=None):
