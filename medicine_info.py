@@ -1,10 +1,6 @@
 from mysql.connector import connect
 import actions
 
-conn = connect(host='localhost', user='root', password='1234')
-cur = conn.cursor()
-cur.execute("use MedicalStore")
-
 
 def create_record(barcode, name, m_type, composition):
     if composition == "NULL":
@@ -16,8 +12,8 @@ def create_record(barcode, name, m_type, composition):
     conn.commit()
 
 
-def create_record_from_list(l):
-    create_record(l[0], l[1], l[2], l[3])
+def create_record_from_list(lst):
+    create_record(lst[0], lst[1], lst[2], lst[3])
 
 
 def create_records(records):
@@ -35,6 +31,8 @@ def view():
     print("0: Go to home")
     print("1: Go to Medicine Information")
     ch = input()
+    columns_all = actions.get_columns("MedicineInfo")
+    col_dict = {i+1: columns_all[i] for i in range(len(columns_all))}
 
     while ch not in '012345' or len(ch) != 1:
         ch = input("Invalid choice. Enter again: ")
@@ -49,59 +47,40 @@ def view():
         actions.format_print(actions.get_columns("MedicineInfo"), actions.show_all("MedicineInfo"))
 
     elif ch == '3':
-        column = input("Which column do you want to use for record matching")
-        columns = actions.get_columns("MedicineInfo")
-        while column not in columns:
-            column = input("Column you entered is not in table. Please enter again: ")
-        records = input_rows()
-        actions.format_print(columns, actions.search_multiple("MedicineInfo", column, records))
+        print("All columns are:")
+        print(str(col_dict).lstrip('{').rstrip('}'))
+        column = input("Which column no. do you want to use for record matching: ").lower()
+        while not column.isdigit() or int(column) not in col_dict:
+            column = input("Column no. you entered is not in option. Please enter again: ").lower()
+        records = actions.input_rows()
+        actions.format_print(columns_all, actions.search_multiple("MedicineInfo", col_dict[int(column)], records))
 
     elif ch == '4':
-        clm = input_cols()
+        clm = actions.input_cols("MedicineInfo")
         actions.format_print(clm, actions.show_columns("MedicineInfo", clm))
 
     elif ch == '5':
-        columns = input_cols()
-        column = input("Which column do you want to use for record matching")
-        columns_all = actions.get_columns("MedicineInfo")
-        while column not in columns_all:
-            column = input("Column you entered is not in table. Please enter again: ")
-        records = input_rows()
-        actions.format_print(columns, actions.search_multiple("medicineInfo", column, records, columns))
+        columns = actions.input_cols("MedicineInfo")
+        column = input("Which column no. do you want to use for record matching").lower()
+        while not column.isdigit() or int(column) not in col_dict:
+            column = input("Column no. you entered is not in option. Please enter again: ").lower()
+        records = actions.input_rows()
+        actions.format_print(columns, actions.search_multiple("MedicineInfo", col_dict[int(column)], records,
+                                                              str(columns).lstrip('[').rstrip(']').replace("'", '')
+                                                              ))
 
 
-def input_cols():
-    num = input("Enter no. of columns you want: ")
-    while not num.isdigit():
-        num = input("Enter integer value only: ")
-
-    columns = actions.get_columns("MedicineInfo")
-    clm = []
-    print(columns)
-    for i in range(int(num)):
-        column = input(f"Enter name of column{i + 1}: ").lower()
-        while column not in columns:
-            column = input("The column you entered is not in table. Please enter again: ")
-        clm.append(column)
-    return clm
-
-
-def input_rows():
-    num = input("Enter no. of records you want to view: ")
-    while not num.isdigit():
-        num = input("Enter integer value only: ")
-    records = []
-    for i in range(int(num)):
-        record = input(f'Enter record{i + 1}: ')
-        records.append(record)
-    return records
-
-
-def insert():
+def insert(bar=None):
     print()
-    bar = input("Enter barcode of medicine: ")
-    while not bar.isdigit():
-        bar = input("Barcode should be integer. Please enter again: ")
+    if bar is None:
+        bar = input("Enter barcode of medicine: ")
+        bars = actions.get_values("MedicineInfo", "Barcode")
+
+        while not bar.isdigit() or bar in bars:
+            if not bar.isdigit():
+                bar = input(" Barcode should be an integer only! Enter again: ")
+            else:
+                bar = input("This  barcode is already taken! Enter another: ")
 
     name = input("Enter name of medicine: ")
     while name == '':
@@ -116,6 +95,7 @@ def insert():
         composition = "NULL"
 
     create_record(bar, name, m_type, composition)
+    print("Inserted record successfully...")
 
 
 def delete():
@@ -143,15 +123,18 @@ def delete():
             bar = input("Barcode should be an integer only! Please enter again: ")
 
         actions.delete_record("MedicineInfo", "Barcode", bar)
+        print("Deleted record successfully...")
 
     elif ch == '3':
         name = input("Enter name of medicine: ")
         actions.delete_record("MedicineInfo", "Name", name)
+        print("Deleted record successfully...")
 
     elif ch == '4':
         condition = input("Enter condition for deletion: ")
         try:
             actions.delete_by_condition("MedicineInfo", condition)
+            print("Deleted record(s) successfully...")
         except Exception as e:
             print(e)
             print("Your condition had the above error!")
@@ -165,6 +148,7 @@ def update():
     print("0. Home")
     print("1. Medicine Information")
     ch = input("Enter your choice: ")
+    condition = '1=1'
 
     while ch not in '01234' or len(ch) != 1:
         ch = input("Invalid choice! Please enter again: ")
@@ -190,13 +174,14 @@ def update():
         condition = input("Enter condition: ")
 
     if ch in '234' and len(ch) == 1:
-        column = input("Which column do you want to update: ")
+        column = input("Which column do you want to update: ").lower()
         columns = actions.get_columns("MedicineInfo")
         while column not in columns:
-            column = input("Column you entered is not in table! Enter again: ")
+            column = input("Column you entered is not in table! Enter again: ").lower()
         val = input("Enter value: ")
         try:
             actions.update("MedicineInfo", column, val, condition)
+            print("Updated records successfully...")
         except Exception as e:
             print("An error occurred!")
             print(e)
@@ -239,21 +224,25 @@ def search():
         while not num.isdigit():
             num = input("Enter integer value only: ")
 
-        columns = actions.get_columns("MedicineInfo")
+        columns_all = actions.get_columns("MedicineInfo")
+        col_dict = {i+1: columns_all[i] for i in range(len(columns_all))}
+        print("The columns are:")
+        print(str(col_dict).lstrip('{').rstrip('}'))
         condition = ''
         for i in range(int(num)):
-            col = input(f"Enter name of column{i + 1}: ")
-            while col not in columns:
-                col = input("The column you entered is not in table. Please enter again: ")
+            col = input(f"Enter code for column{i + 1}: ")
+            while not col.isdigit() or int(col) not in col_dict:
+                col = input("The column no. you entered is not in option. Please enter again: ")
+            col = col_dict[int(col)]
             val = input(f"Enter value for column{i + 1}: ")
-            op = input("Enter condition (<, =, >, >=, <=): ")
+            op = input("Enter operator (<, =, >, >=, <=): ")
             while op not in ['<', '>', '=', '<=', '>=']:
                 op = input("Wrong operator! Please enter again: ")
             condition += col + op + "'" + val + "'"
             if i != int(num) - 1:
                 condition += '&&'
         print(condition)
-        actions.format_print(columns, actions.search_by_condition("MedicineInfo", condition))
+        actions.format_print(columns_all, actions.search_by_condition("MedicineInfo", condition))
 
     elif ch == '5':
 
@@ -262,8 +251,8 @@ def search():
             actions.format_print(actions.get_columns("MedicineInfo"),
                                  actions.search_by_condition("MedicineInfo", condition))
         except Exception as e:
+            print("Your condition had an error!!")
             print(e)
-            print("There was an error!!")
 
 
 def init():
@@ -278,7 +267,6 @@ def init():
                 ch = input("Invalid choice. Enter again: ")
 
             if ch == '0':
-                code = 0
                 break
 
             elif ch == '1':
@@ -315,6 +303,9 @@ Enter Your Choice:
 """
 
 if __name__ == '__main__':
+    conn = connect(host='localhost', user='root', password='abhinav1')
+    cur = conn.cursor()
+    cur.execute("use MedicalStore")
     actions.conn = conn
     actions.cur = cur
     init()
