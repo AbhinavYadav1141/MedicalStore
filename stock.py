@@ -29,6 +29,8 @@ def view():
     print("0: Go to home")
     print("1: Go to Stock Information")
     ch = input()
+    columns_all = actions.get_columns("Stock")
+    col_dict = {i+1: columns_all[i] for i in range(len(columns_all))}
 
     while ch not in '0123456' or len(ch) != 1:
         ch = input("Invalid choice. Enter again: ")
@@ -40,15 +42,16 @@ def view():
         return '1'
 
     elif ch == '2':
-        actions.format_print(actions.get_columns("Stock"), actions.show_all("Stock"))
+        actions.format_print(columns_all, actions.show_all("Stock"))
 
     elif ch == '3':
-        column = input("Which column do you want to use for record matching: ").lower()
-        columns = actions.get_columns("Stock")
-        while column not in columns:
-            column = input("Column you entered is not in table. Please enter again: ").lower()
+        print("The columns are:")
+        print(str(col_dict).lstrip('{').rstrip('}'))
+        column = input("Which column no. do you want to use for record matching: ").lower()
+        while not column.isdigit() or int(column) not in col_dict:
+            column = input("Column no. you entered is not in option. Please enter again: ").lower()
         records = actions.input_rows()
-        actions.format_print(columns, actions.search_multiple("Stock", column, records))
+        actions.format_print(columns_all, actions.search_multiple("Stock", col_dict[int(column)], records))
 
     elif ch == '4':
         clm = actions.input_cols("Stock")
@@ -56,12 +59,11 @@ def view():
 
     elif ch == '5':
         columns = actions.input_cols("Stock")
-        column = input("Which column do you want to use for record matching").lower()
-        columns_all = actions.get_columns("Stock")
-        while column not in columns_all:
-            column = input("Column you entered is not in table. Please enter again: ").lower()
+        column = input("Which column no. do you want to use for record matching").lower()
+        while not column.isdigit() or int(column) not in col_dict:
+            column = input("Column no. you entered is not in option. Please enter again: ").lower()
         records = actions.input_rows()
-        actions.format_print(columns, actions.search_multiple("Stock", column, records, columns))
+        actions.format_print(columns, actions.search_multiple("Stock", col_dict[int(column)], records, columns))
 
     elif ch == '6':
         cur.execute("select * from Stock where Exp<(select sysdate())")
@@ -73,8 +75,12 @@ def insert():
     print("Enter Records")
 
     batch = input("Batch No.: ")
-    while not batch.isdigit():
-        batch = input("Batch No. should be an integer only. Please enter again: ")
+    batch_nos = actions.get_values("Stock", "BatchNo")
+    while not batch.isdigit() or batch in batch_nos:
+        if not batch.isdigit():
+            batch = input("Batch No. should be an integer only. Please enter again: ")
+        else:
+            batch = input("This batch no. is already there! Enter another: ")
 
     bar = input("Barcode of medicine: ")
     while not bar.isdigit():
@@ -148,6 +154,8 @@ def update():
     print("1. Medicine Information")
     ch = input("Enter your choice: ")
 
+    condition = '1=1'
+
     while ch not in '0123' or len(ch) != 1:
         ch = input("Invalid choice! Please enter again: ")
 
@@ -184,12 +192,15 @@ def update():
 def search():
     print()
     print("Search Options:")
-    print("2: Search using barcode")
+    print("2: Search using batch no.")
     print("3: Search using many fields")
     print("4: Search using condition")
     print("0: Home")
     print("1: Medicine information")
     ch = input("Enter your choice: ")
+
+    columns_all = actions.get_columns("Stock")
+    col_dict = {i+1: columns_all[i] for i in range(len(columns_all))}
 
     while ch not in '01234' or len(ch) != 1:
         ch = input("Invalid choice. Enter again: ")
@@ -204,7 +215,7 @@ def search():
         batch = input("Enter batch no.: ")
         while not batch.isdigit():
             batch = input("Batch no. should only be integer. Enter again: ")
-        actions.format_print(actions.get_columns("Stock"),
+        actions.format_print(columns_all,
                              actions.search_by_condition("Stock", f"BatchNo={batch}"))
 
     elif ch == '3':
@@ -212,20 +223,22 @@ def search():
         while not num.isdigit():
             num = input("Enter integer value only: ")
 
-        columns = actions.get_columns("Stock")
+        print("The columns are:")
+        print(str(col_dict).lstrip('{').rstrip('}'))
         condition = ''
         for i in range(int(num)):
-            col = input(f"Enter name of column{i + 1}: ")
-            while col not in columns:
-                col = input("The column you entered is not in table. Please enter again: ")
+            col = input(f"Enter code for column{i + 1}: ")
+            while not col.isdigit() or int(col) not in col_dict:
+                col = input("The column no. you entered is not in option. Please enter again: ")
+            col = col_dict[int(col)]
             val = input(f"Enter value for column{i + 1}: ")
-            op = input("Enter condition (<, =, >, >=, <=): ")
+            op = input("Enter operator (<, =, >, >=, <=): ")
             while op not in ['<', '>', '=', '<=', '>=']:
                 op = input("Wrong operator! Please enter again: ")
             condition += col + op + "'" + val + "'"
             if i != int(num) - 1:
                 condition += '&&'
-        actions.format_print(columns, actions.search_by_condition("Stock", condition))
+        actions.format_print(columns_all, actions.search_by_condition("Stock", condition))
 
     elif ch == '4':
 
@@ -250,14 +263,13 @@ def init():
                 ch = input("Invalid choice. Enter again: ")
 
             if ch == '0':
-                code = 0
                 break
 
             elif ch == '1':
                 code = view()
 
             elif ch == '2':
-                code = insert()
+                insert()
 
             elif ch == '3':
                 code = delete()

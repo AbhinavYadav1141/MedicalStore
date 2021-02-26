@@ -143,14 +143,16 @@ def input_cols(table):
     while not num.isdigit():
         num = input("Enter integer value only: ")
 
-    columns = get_columns(table)
+    columns_all = get_columns("MedicineInfo")
+    col_dict = {i+1: columns_all[i] for i in range(len(columns_all))}
     clm = []
-    print(columns)
+    print("All columns are:")
+    print(str(col_dict).lstrip('{').rstrip('}'))
     for i in range(int(num)):
-        column = input(f"Enter name of column{i + 1}: ").lower()
-        while column not in columns:
-            column = input("The column you entered is not in table. Please enter again: ").lower()
-        clm.append(column)
+        column = input(f"Enter code for column{i + 1}: ").lower()
+        while not column.isdigit() or int(column) not in col_dict:
+            column = input("The column no. you entered is not in option. Please enter again: ").lower()
+        clm.append(columns_all[int(column)])
     return clm
 
 

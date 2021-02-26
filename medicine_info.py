@@ -31,6 +31,8 @@ def view():
     print("0: Go to home")
     print("1: Go to Medicine Information")
     ch = input()
+    columns_all = actions.get_columns("MedicineInfo")
+    col_dict = {i+1: columns_all[i] for i in range(len(columns_all))}
 
     while ch not in '012345' or len(ch) != 1:
         ch = input("Invalid choice. Enter again: ")
@@ -45,12 +47,13 @@ def view():
         actions.format_print(actions.get_columns("MedicineInfo"), actions.show_all("MedicineInfo"))
 
     elif ch == '3':
-        column = input("Which column do you want to use for record matching: ").lower()
-        columns = actions.get_columns("MedicineInfo")
-        while column not in columns:
-            column = input("Column you entered is not in table. Please enter again: ").lower()
+        print("All columns are:")
+        print(str(col_dict).lstrip('{').rstrip('}'))
+        column = input("Which column no. do you want to use for record matching: ").lower()
+        while not column.isdigit() or int(column) not in col_dict:
+            column = input("Column no. you entered is not in option. Please enter again: ").lower()
         records = actions.input_rows()
-        actions.format_print(columns, actions.search_multiple("MedicineInfo", column, records))
+        actions.format_print(columns_all, actions.search_multiple("MedicineInfo", col_dict[int(column)], records))
 
     elif ch == '4':
         clm = actions.input_cols("MedicineInfo")
@@ -58,12 +61,11 @@ def view():
 
     elif ch == '5':
         columns = actions.input_cols("MedicineInfo")
-        column = input("Which column do you want to use for record matching").lower()
-        columns_all = actions.get_columns("MedicineInfo")
-        while column not in columns_all:
-            column = input("Column you entered is not in table. Please enter again: ").lower()
+        column = input("Which column no. do you want to use for record matching").lower()
+        while not column.isdigit() or int(column) not in col_dict:
+            column = input("Column no. you entered is not in option. Please enter again: ").lower()
         records = actions.input_rows()
-        actions.format_print(columns, actions.search_multiple("MedicineInfo", column, records,
+        actions.format_print(columns, actions.search_multiple("MedicineInfo", col_dict[int(column)], records,
                                                               str(columns).lstrip('[').rstrip(']').replace("'", '')
                                                               ))
 
@@ -222,21 +224,25 @@ def search():
         while not num.isdigit():
             num = input("Enter integer value only: ")
 
-        columns = actions.get_columns("MedicineInfo")
+        columns_all = actions.get_columns("MedicineInfo")
+        col_dict = {i+1: columns_all[i] for i in range(len(columns_all))}
+        print("The columns are:")
+        print(str(col_dict).lstrip('{').rstrip('}'))
         condition = ''
         for i in range(int(num)):
-            col = input(f"Enter name of column{i + 1}: ")
-            while col not in columns:
-                col = input("The column you entered is not in table. Please enter again: ")
+            col = input(f"Enter code for column{i + 1}: ")
+            while not col.isdigit() or int(col) not in col_dict:
+                col = input("The column no. you entered is not in option. Please enter again: ")
+            col = col_dict[int(col)]
             val = input(f"Enter value for column{i + 1}: ")
-            op = input("Enter condition (<, =, >, >=, <=): ")
+            op = input("Enter operator (<, =, >, >=, <=): ")
             while op not in ['<', '>', '=', '<=', '>=']:
                 op = input("Wrong operator! Please enter again: ")
             condition += col + op + "'" + val + "'"
             if i != int(num) - 1:
                 condition += '&&'
         print(condition)
-        actions.format_print(columns, actions.search_by_condition("MedicineInfo", condition))
+        actions.format_print(columns_all, actions.search_by_condition("MedicineInfo", condition))
 
     elif ch == '5':
 
@@ -245,8 +251,8 @@ def search():
             actions.format_print(actions.get_columns("MedicineInfo"),
                                  actions.search_by_condition("MedicineInfo", condition))
         except Exception as e:
+            print("Your condition had an error!!")
             print(e)
-            print("There was an error!!")
 
 
 def init():

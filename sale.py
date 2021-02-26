@@ -71,7 +71,7 @@ def create_table(receipt_no, count, barcodes):
         else:
             cp = cps[0][0]
 
-        sp = input("Selling Price: ")
+        sp = input(f"Selling Price(Cost: Rs {cp}): ")
         while not sp.isdigit():
             sp = input("Selling Price should be an integer! Enter Again: ")
 
