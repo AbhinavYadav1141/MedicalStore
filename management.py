@@ -78,13 +78,21 @@ def view():
 
 def insert():
     print()
-    month = input(f"{sale.months}\nEnter month number: ")
-    while not month.isdigit() or 1 >= int(month) >= 12:
-        month = input("Month no. you entered is not valid! Enter again: ")
+    cur.execute("select Month, Year from Management")
+    my = cur.fetchall()
+    while True:
+        month = input(f"{sale.months}\nEnter month number: ")
+        while not month.isdigit() or 1 >= int(month) >= 12:
+            month = input("Month no. you entered is not valid! Enter again: ")
 
-    year = input("Enter year(yyyy): ")
-    while not year.isdigit() or len(year) != 4:
-        year = input("Year should be of form yyyy! Enter again: ")
+        year = input("Enter year(yyyy): ")
+        while not year.isdigit() or len(year) != 4:
+            year = input("Year should be of form yyyy! Enter again: ")
+
+        if (month, int(year)) not in my:
+            break
+        else:
+            print("This month-year pair is already in table. Enter again")
 
     cp = input("Enter cost price: ")
     while not cp.isdigit():
@@ -94,7 +102,8 @@ def insert():
     while not sp.isdigit():
         sp = input("Selling Price should be an integer! Enter again: ")
 
-    update_record(month, year, cp, sp)
+    create_record(month, year, cp, sp)
+    print("Created record successfully...")
 
 
 def delete():
@@ -118,6 +127,7 @@ def delete():
             cur.execute(f"delete from Management where Year={year} and Month={month}")
 
     conn.commit()
+    print("Deleted successfully...")
 
 
 def update():
@@ -175,6 +185,7 @@ def update():
         sp = input("Selling price should be an integer! Enter again: ")
     cur.execute(f"""update Management set SellingPrice={sp}, NetGain=SellingPrice-CostPrice,
                     NetPercent=NetGain/CostPrice*100 where Month={m} and Year={y}""")
+    print("Updated successfully...")
 
 
 def init():

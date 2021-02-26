@@ -93,6 +93,7 @@ def insert(bar=None):
         composition = "NULL"
 
     create_record(bar, name, m_type, composition)
+    print("Inserted record successfully...")
 
 
 def delete():
@@ -120,15 +121,18 @@ def delete():
             bar = input("Barcode should be an integer only! Please enter again: ")
 
         actions.delete_record("MedicineInfo", "Barcode", bar)
+        print("Deleted record successfully...")
 
     elif ch == '3':
         name = input("Enter name of medicine: ")
         actions.delete_record("MedicineInfo", "Name", name)
+        print("Deleted record successfully...")
 
     elif ch == '4':
         condition = input("Enter condition for deletion: ")
         try:
             actions.delete_by_condition("MedicineInfo", condition)
+            print("Deleted record(s) successfully...")
         except Exception as e:
             print(e)
             print("Your condition had the above error!")
@@ -142,6 +146,7 @@ def update():
     print("0. Home")
     print("1. Medicine Information")
     ch = input("Enter your choice: ")
+    condition = '1=1'
 
     while ch not in '01234' or len(ch) != 1:
         ch = input("Invalid choice! Please enter again: ")
@@ -174,6 +179,7 @@ def update():
         val = input("Enter value: ")
         try:
             actions.update("MedicineInfo", column, val, condition)
+            print("Updated records successfully...")
         except Exception as e:
             print("An error occurred!")
             print(e)

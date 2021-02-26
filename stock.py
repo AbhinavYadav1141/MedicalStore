@@ -100,11 +100,8 @@ def insert():
     while not actions.check_date(exp):
         exp = input("Your date format is nor correct! Enter again(yyyy-mm-dd): ")
 
-    try:
-        create_record(batch, bar, cp, p_date, qty, mfg, exp)
-    except Exception as e:
-        print("An Error Occurred!!")
-        print(e)
+    create_record(batch, bar, cp, p_date, qty, mfg, exp)
+    print("Created record successfully...")
 
 
 def delete():
@@ -131,11 +128,13 @@ def delete():
             batch = input("Barcode should be an integer only! Please enter again: ")
 
         actions.delete_record("Stock", "BatchNo", batch)
+        print("Deleted successfully...")
 
     elif ch == '3':
         condition = input("Enter condition for deletion: ")
         try:
             actions.delete_by_condition("Stock", condition)
+            print("Deleted successfully...")
         except Exception as e:
             print(e)
             print("Your condition had the above error!")
@@ -176,8 +175,9 @@ def update():
         val = input("Enter value: ")
         try:
             actions.update("Stock", column, val, condition)
+            print("Updated successfully...")
         except Exception as e:
-            print("An error occurred!")
+            print("An error occurred!!" if ch == '2' else "Your condition had an error!!")
             print(e)
 
 
@@ -225,7 +225,6 @@ def search():
             condition += col + op + "'" + val + "'"
             if i != int(num) - 1:
                 condition += '&&'
-        print(condition)
         actions.format_print(columns, actions.search_by_condition("Stock", condition))
 
     elif ch == '4':
