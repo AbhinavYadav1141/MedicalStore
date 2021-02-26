@@ -22,11 +22,11 @@ def search_by_condition(table, condition, sel_col='*'):
     return result
 
 
-def search(table, column, value, operator, sel_col='*'):
+def search(table, column, value, operator='=', sel_col='*'):
     return search_by_condition(table, f"{column} {operator} '{value}'", sel_col)
 
 
-def search_multiple(table, column, values: list, sel_col='*', operator='='):
+def search_multiple(table, column, values: list, sel_col='*'):
     if len(values) == 1:
         query = f"select {sel_col} from {table} where {column} = '{values[0]}'"
     else:
