@@ -1,4 +1,4 @@
-from mysql.connector import connect
+from mysql.connector import connect, errors
 import actions
 import sale
 
@@ -153,9 +153,10 @@ def update():
     if m != '':
         try:
             cur.execute(f"update Management set Month={m} where Month={month} and Year={year}")
-        except Exception:
+        except errors.IntegrityError:
             print("This month already exists!!")
             m = month
+
     else:
         m = month
 
@@ -166,7 +167,7 @@ def update():
     if y != '':
         try:
             cur.execute(f"update Management set Year={y} where Month={m} and Year={year}")
-        except Exception:
+        except errors.IntegrityError:
             print("This month already exists!!")
             y = year
     else:

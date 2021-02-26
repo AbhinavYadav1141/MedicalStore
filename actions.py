@@ -39,8 +39,8 @@ def search_multiple(table, column, values: list, sel_col='*'):
 
 def sysdate():
     cur.execute("select sysdate()")
-    date = cur.fetchall()
-    return str(date[0][0].isoformat()).split('T')
+    dt = cur.fetchall()
+    return str(dt[0][0].isoformat()).split('T')
 
 
 def date():
@@ -143,7 +143,7 @@ def input_cols(table):
     while not num.isdigit():
         num = input("Enter integer value only: ")
 
-    columns_all = get_columns("MedicineInfo")
+    columns_all = get_columns(table)
     col_dict = {i+1: columns_all[i] for i in range(len(columns_all))}
     clm = []
     print("All columns are:")
@@ -176,14 +176,14 @@ def date_format(*args):
     return tuple(args)
 
 
-def check_date(date: str):
-    if date.count('-') != 2:
+def check_date(dt: str):
+    if dt.count('-') != 2:
         return False
-    if not date.replace('-', '0').isdigit():
+    if not dt.replace('-', '0').isdigit():
         return False
-    date = date.split('-')
+    dt = dt.split('-')
 
-    if len(date[0]) != 4 or len(date[1]) != 2 or len(date[2]) != 2:
+    if len(dt[0]) != 4 or len(dt[1]) != 2 or len(dt[2]) != 2:
         return False
     return True
 

@@ -12,8 +12,8 @@ def create_record(barcode, name, m_type, composition):
     conn.commit()
 
 
-def create_record_from_list(l):
-    create_record(l[0], l[1], l[2], l[3])
+def create_record_from_list(lst):
+    create_record(lst[0], lst[1], lst[2], lst[3])
 
 
 def create_records(records):
@@ -267,7 +267,6 @@ def init():
                 ch = input("Invalid choice. Enter again: ")
 
             if ch == '0':
-                code = 0
                 break
 
             elif ch == '1':
