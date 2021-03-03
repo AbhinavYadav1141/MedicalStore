@@ -5,6 +5,7 @@ import management
 import medicine_info
 import sale
 import stock
+import traceback
 
 conn = connect(user='root', passwd='abhinav1')
 cur = conn.cursor()
@@ -58,3 +59,4 @@ while True:
     except Exception as e:
         print("An Error Occurred!  Error Code: 00")
         print(e)
+        traceback.print_exc()

@@ -1,4 +1,5 @@
 from mysql.connector import connect
+import mysql
 
 
 def delete_record(table, column, value):
@@ -144,7 +145,7 @@ def input_cols(table):
         num = input("Enter integer value only: ")
 
     columns_all = get_columns(table)
-    col_dict = {i+1: columns_all[i] for i in range(len(columns_all))}
+    col_dict = {i + 1: columns_all[i] for i in range(len(columns_all))}
     clm = []
     print("All columns are:")
     print(str(col_dict).lstrip('{').rstrip('}'))
@@ -177,25 +178,29 @@ def date_format(*args):
 
 
 def check_date(dt: str):
-    if dt.count('-') != 2:
+    try:
+        cur.execute(f"select date({dt})")
+        dt = cur.fetchall()[0][0]
+    except mysql.connector.errors.ProgrammingError:
         return False
-    if not dt.replace('-', '0').isdigit():
+    except:
         return False
-    dt = dt.split('-')
-
-    if len(dt[0]) != 4 or len(dt[1]) != 2 or len(dt[2]) != 2:
+    if dt is None:
         return False
-    return True
+    else:
+        return str(dt).split("(")[-1].split(")")[0]
 
 
 def check_time(t: str):
+    t = str(t)
     if t.count(':') != 2:
         return False
     if not t.replace(':', '0').isdigit():
         return False
 
     t = t.split(":")
-    if len(t[0]) == len(t[1]) == len(t[2]) == 2:
+    if (len(t[0]) == len(t[1]) == len(t[2]) == 2) and \
+            (0 <= int(t[0]) < 24 and 0 <= int(t[1]) < 60 and 0 <= int(t[2]) < 60):
         return True
 
     return False

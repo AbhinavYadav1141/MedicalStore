@@ -1,5 +1,6 @@
 from mysql.connector import connect
 import actions
+import traceback
 
 
 def create_record(batch, bar, cost, date, qty_left, mfg, exp):
@@ -67,7 +68,8 @@ def view():
 
     elif ch == '6':
         cur.execute("select * from Stock where Exp<(select sysdate())")
-        actions.format_print(actions.get_columns("Stock"),  cur.fetchall())
+        data = cur.fetchall()
+        actions.format_print(actions.get_columns("Stock"),  data)
 
 
 def insert():
@@ -91,20 +93,29 @@ def insert():
         cp = "Cost should be an integer! Please enter again: "
 
     p_date = input("Purchase date (yyyy-mm-dd): ")
-    while not actions.check_date(p_date):
+    p_date = actions.check_date(p_date)
+    while not p_date:
         p_date = input("Your date format is nor correct! Enter again(yyyy-mm-dd): ")
+        p_date = actions.check_date(p_date)
+    print(f"Purchase Date: {p_date}")
 
     qty = input("Quantity left (no. of packets): ")
     while not qty.isdigit():
         qty = input("Quantity should be an integer only! Please enter again: ")
 
     mfg = input("Manufacturing date: ")
-    while not actions.check_date(mfg):
+    mfg = actions.check_date(mfg)
+    while not mfg:
         mfg = input("Your date format is nor correct! Enter again(yyyy-mm-dd): ")
+        mfg = actions.check_date(mfg)
+    print(f"Manufacturing date: {mfg}")
 
     exp = input("Expiry date: ")
-    while not actions.check_date(exp):
+    exp = actions.check_date(exp)
+    while not exp:
         exp = input("Your date format is nor correct! Enter again(yyyy-mm-dd): ")
+        exp = actions.check_date(exp)
+    print("Expiry date: exp")
 
     create_record(batch, bar, cp, p_date, qty, mfg, exp)
     print("Created record successfully...")
@@ -198,6 +209,7 @@ def update():
         except Exception as e:
             print("An error occurred!!  Error code: 021" if ch == '2' else "Your condition had an error!!")
             print(e)
+            traceback.print_exc()
 
 
 def search():
@@ -207,7 +219,7 @@ def search():
     print("3: Search using many fields")
     print("4: Search using condition")
     print("0: Home")
-    print("1: Medicine information")
+    print("1: Stock information")
     ch = input("Enter your choice: ")
 
     columns_all = actions.get_columns("Stock")
@@ -254,10 +266,12 @@ def search():
     elif ch == '4':
 
         try:
+            print("All columns are:")
+            print(columns_all)
             condition = input('Enter condition(<column_name><operator>"<value>": ')
             while True:
                 try:
-                    cur.execute(f"select 1+2 where {condition}")
+                    cur.execute(f"select 1+2 from Stock where {condition}")
                     cur.fetchall()
                     break
                 except Exception as e:
@@ -268,6 +282,7 @@ def search():
         except Exception as e:
             print(e)
             print("There was an error!!  Error code: 022")
+            traceback.print_exc()
 
 
 def init():
@@ -311,6 +326,7 @@ def init():
         except Exception as e:
             print("An Error Occurred!!  Error code: 02")
             print(e)
+            traceback.print_exc()
 
 
 msg = """

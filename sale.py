@@ -163,7 +163,7 @@ def view():
         condition = input('Enter condition(<column_name><operator>"<value>"): ')
         while True:
             try:
-                cur.execute(f"select 1+2 where {condition}")
+                cur.execute(f"select 1+2 from Sale where {condition}")
                 cur.fetchall()
                 break
             except Exception as e:
@@ -175,6 +175,7 @@ def view():
         except Exception as e:
             print("Your condition had an error!!")
             print(e)
+            traceback.print_exc()
 
     records = []
     receipts = actions.get_values("Sale", "ReceiptNo")
@@ -252,13 +253,13 @@ def update():
 
     if receipt != '':
         cur.execute(f"update Sale set ReceiptNo={receipt} where ReceiptNo = {rec}")
-        cur.execute(f"alter table Sales.t{rec} rename t{receipt}")
+        cur.execute(f"alter table Sales.t{rec} rename Sales.t{receipt}")
         print("Updated successfully...")
         rec = receipt
 
     name = input("Customer Name: ")
     if name != '':
-        cur.execute(f"update Sale set name={name} where ReceiptNo = {rec}")
+        cur.execute(f"update Sale set CustomerName={name} where ReceiptNo = {rec}")
         print("Updated successfully...")
 
     count = input("No. of medicines sold: ")
@@ -272,11 +273,14 @@ def update():
     date = input("Date (yyyy-mm-dd): ")
     cur.execute(f"select SaleDate from Sale where ReceiptNo={rec}")
     old_date = cur.fetchall()[0][0]
-    while not actions.check_date(date) and date != '':
+    dt = actions.check_date(date)
+    while not dt and date != '':
         date = input("Date you entered is not of correct format! Enter again: ")
+        dt = actions.check_date(date)
 
     if date != '':
-        cur.execute(f"update Sale set SaleDate={date} where ReceiptNo = {rec}")
+        print(f"Date: {dt}")
+        cur.execute(f"update Sale set SaleDate={dt} where ReceiptNo = {rec}")
         print("Updated successfully...")
 
     time = input("Time (hh:mm:ss)")
@@ -374,12 +378,18 @@ def search():
 
     elif ch == '4':
         start = input("Enter starting date(yyyy-mm-dd): ")
-        while not actions.check_date(start):
+        start = actions.check_date(start)
+        while not start:
             start = input("Date you entered is not of correct format! Enter again(yyyy-mm-dd): ")
+            start = actions.check_date(start)
+        print(f"Starting Date: {start}")
 
         end = input("Enter ending date(yyyy-mm-dd): ")
-        while not actions.check_date(end):
+        end = actions.check_date(end)
+        while not end:
             end = input("Date you entered is not of correct format! Enter again(yyyy-mm-dd): ")
+            end = actions.check_date(end)
+        print(f"Ending Date: {end}")
 
         actions.format_print(actions.get_columns("Sale"),
                              actions.search_by_condition("Sale", f"'{end}'>=SaleDate and SaleDate>='{start}'"))
@@ -398,12 +408,18 @@ def search():
 
     elif ch == '6':
         start1 = input("Enter starting date(yyyy-mm-dd): ")
-        while not actions.check_date(start1):
+        start1 = actions.check_date(start1)
+        while not start1:
             start1 = input("Date you entered is not of correct format! Enter again(yyyy-mm-dd): ")
+            start1 = actions.check_date(start1)
+        print(f"Starting date: {start1}")
 
         end1 = input("Enter ending date(yyyy-mm-dd): ")
-        while not actions.check_date(end1):
+        end1 = actions.check_date(end1)
+        while not end1:
             end1 = input("Date you entered is not of correct format! Enter again(yyyy-mm-dd): ")
+            end1 = actions.check_date(end1)
+        print(f"Ending Date: {end1}")
 
         start2 = input("Enter starting time(hh:mm:ss): ")
         while not actions.check_time(start2):

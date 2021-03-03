@@ -1,6 +1,7 @@
 from mysql.connector import connect, errors
 import actions
 import sale
+import traceback
 
 
 def create_record(month, year, cost, sell):
@@ -236,6 +237,7 @@ def init():
         except Exception as e:
             print("An Error Occurred!!  Error code: 04")
             print(e)
+            traceback.print_exc()
 
         if a == '0':
             break
