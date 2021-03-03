@@ -31,7 +31,7 @@ def search_multiple(table, column, values: list, sel_col='*'):
         query = f"select {sel_col} from {table} where {column} = '{values[0]}'"
     else:
         query = f"select {sel_col} from {table} where {column} in {tuple(values)}"
-    print(query)
+
     cur.execute(query)
     result = cur.fetchall()
     return result
@@ -152,7 +152,7 @@ def input_cols(table):
         column = input(f"Enter code for column{i + 1}: ").lower()
         while not column.isdigit() or int(column) not in col_dict:
             column = input("The column no. you entered is not in option. Please enter again: ").lower()
-        clm.append(columns_all[int(column)])
+        clm.append(col_dict[int(column)])
     return clm
 
 

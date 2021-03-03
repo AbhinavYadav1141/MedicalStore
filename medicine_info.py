@@ -53,7 +53,15 @@ def view():
         while not column.isdigit() or int(column) not in col_dict:
             column = input("Column no. you entered is not in option. Please enter again: ").lower()
         records = actions.input_rows()
-        actions.format_print(columns_all, actions.search_multiple("MedicineInfo", col_dict[int(column)], records))
+        column = col_dict[int(column)]
+        if column.lower() == "composition":
+            q = f"select * from MedicineInfo where {column} like '%{records[0]}%' "
+            for i in range(1, len(records)):
+                q += f"or {column} like '%{records[i]}%' "
+            cur.execute(q)
+            actions.format_print(columns_all, cur.fetchall())
+        else:
+            actions.format_print(columns_all, actions.search_multiple("MedicineInfo", column, records))
 
     elif ch == '4':
         clm = actions.input_cols("MedicineInfo")
@@ -64,10 +72,16 @@ def view():
         column = input("Which column no. do you want to use for record matching").lower()
         while not column.isdigit() or int(column) not in col_dict:
             column = input("Column no. you entered is not in option. Please enter again: ").lower()
-        records = actions.input_rows()
-        actions.format_print(columns, actions.search_multiple("MedicineInfo", col_dict[int(column)], records,
-                                                              str(columns).lstrip('[').rstrip(']').replace("'", '')
-                                                              ))
+        column = col_dict[int(column)]
+        records = tuple(actions.input_rows())
+        cols = str(columns).lstrip('[').rstrip(']').replace("'", '')
+        if column.lower() == "composition":
+            q = f"select {cols} from MedicineInfo where {column} like '%{records[0]}%' "
+            for i in range(1, len(records)):
+                q += f"or {column} like '%{records[i]}%' "
+            cur.execute(q)
+        else:
+            actions.format_print(columns_all, actions.search_multiple("MedicineInfo", column, records))
 
 
 def insert(bar=None):
@@ -171,19 +185,30 @@ def update():
         condition = f"Name='{name}'"
 
     elif ch == '4':
-        condition = input("Enter condition: ")
+        condition = input('Enter condition(<column_name><operator>"<value>"): ')
+        while True:
+            try:
+                cur.execute(f"select 1+2 where {condition}")
+                cur.fetchall()
+                break
+            except Exception as e:
+                print(e)
+                condition = input('Your condition had above error! Enter again(<column_name><operator>"<value>"): ')
 
     if ch in '234' and len(ch) == 1:
-        column = input("Which column do you want to update: ").lower()
-        columns = actions.get_columns("MedicineInfo")
-        while column not in columns:
-            column = input("Column you entered is not in table! Enter again: ").lower()
+        columns_all = actions.get_columns("MedicineInfo")
+        col_dict = {i + 1: columns_all[i] for i in range(len(columns_all))}
+        print(col_dict)
+        column = input("Which column no. do you want to update: ").lower()
+        while not column.isdigit() or int(column) not in col_dict:
+            column = input("Column no. you entered is not in option! Enter again: ").lower()
+        column = col_dict[int(column)]
         val = input("Enter value: ")
         try:
             actions.update("MedicineInfo", column, val, condition)
             print("Updated records successfully...")
         except Exception as e:
-            print("An error occurred!")
+            print("Your condition had bellow error!")
             print(e)
 
 
@@ -256,7 +281,6 @@ def search():
 
 
 def init():
-    print('\n')
     print("=" * 10 + "     Medicine Information     " + "=" * 10)
     while True:
         try:
@@ -286,6 +310,10 @@ def init():
 
             if code == '0':
                 break
+
+        except KeyboardInterrupt:
+            pass
+
         except Exception as e:
             print("An Error occurred!!")
             print(e)
@@ -293,14 +321,15 @@ def init():
 
 msg = """
 
-Enter Your Choice:
 0: Home
 1: View records
 2: Insert records
 3: Delete records
 4: Update records
 5: Search records
-"""
+Press ctrl+C anywhere in the program to return here
+
+Enter Your Choice: """
 
 if __name__ == '__main__':
     conn = connect(host='localhost', user='root', password='abhinav1')
