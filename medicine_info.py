@@ -319,7 +319,7 @@ def init():
                 break
 
         except Exception as e:
-            print("An Error occurred!!")
+            print("An Error occurred!! Error code: 04")
             print(e)
 
 

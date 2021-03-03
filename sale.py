@@ -457,7 +457,7 @@ def init():
                 break
 
         except Exception as e:
-            print("An Error Occurred!! Error code: 02")
+            print("An Error Occurred!! Error code: 01")
             print(e)
             traceback.print_exc()
 

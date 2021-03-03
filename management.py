@@ -234,7 +234,7 @@ def init():
                 break
 
         except Exception as e:
-            print("An Error Occurred!!")
+            print("An Error Occurred!!  Error code: 04")
             print(e)
 
         if a == '0':

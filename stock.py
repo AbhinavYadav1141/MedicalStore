@@ -196,7 +196,7 @@ def update():
             actions.update("Stock", column, val, condition)
             print("Updated successfully...")
         except Exception as e:
-            print("An error occurred!!  Error code: 011" if ch == '2' else "Your condition had an error!!")
+            print("An error occurred!!  Error code: 021" if ch == '2' else "Your condition had an error!!")
             print(e)
 
 
@@ -267,7 +267,7 @@ def search():
                                  actions.search_by_condition("Stock", condition))
         except Exception as e:
             print(e)
-            print("There was an error!!  Error code: 012")
+            print("There was an error!!  Error code: 022")
 
 
 def init():
@@ -309,7 +309,7 @@ def init():
                 break
 
         except Exception as e:
-            print("An Error Occurred!!  Error code: 01")
+            print("An Error Occurred!!  Error code: 02")
             print(e)
 
 
