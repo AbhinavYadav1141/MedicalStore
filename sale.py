@@ -1,3 +1,5 @@
+import traceback
+
 from mysql.connector import connect
 import actions
 import medicine_info
@@ -419,12 +421,15 @@ def search():
 def init():
     print("=" * 10 + "     Sale Information     " + "=" * 10)
     while True:
+        where = 0
         try:
             ch = input(msg)
             code = 1
 
             while ch not in '012345' or len(ch) != 1:
                 ch = input("Invalid choice. Enter again: ")
+
+            where = 1
 
             if ch == '0':
                 break
@@ -448,11 +453,13 @@ def init():
                 break
 
         except KeyboardInterrupt:
-            pass
+            if where == 0:
+                break
 
         except Exception as e:
-            print("An Error Occurred!!")
+            print("An Error Occurred!! Error code: 02")
             print(e)
+            traceback.print_exc()
 
 
 msg = """
@@ -463,7 +470,6 @@ msg = """
 3: Delete records
 4: Update record
 5: Search records
-Press ctrl+C anywhere in the program to return here
 
 Enter Your Choice: """
 

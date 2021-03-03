@@ -196,7 +196,7 @@ def update():
             actions.update("Stock", column, val, condition)
             print("Updated successfully...")
         except Exception as e:
-            print("An error occurred!!" if ch == '2' else "Your condition had an error!!")
+            print("An error occurred!!  Error code: 011" if ch == '2' else "Your condition had an error!!")
             print(e)
 
 
@@ -267,18 +267,21 @@ def search():
                                  actions.search_by_condition("Stock", condition))
         except Exception as e:
             print(e)
-            print("There was an error!!")
+            print("There was an error!!  Error code: 012")
 
 
 def init():
     print("=" * 10 + "     Stock Information     " + "=" * 10)
     while True:
+        where = 0
         try:
             ch = input(msg)
             code = 1
 
             while ch not in '012345' or len(ch) != 1:
                 ch = input("Invalid choice. Enter again: ")
+
+            where = 1
 
             if ch == '0':
                 break
@@ -302,10 +305,11 @@ def init():
                 break
 
         except KeyboardInterrupt:
-            pass
+            if where == 0:
+                break
 
         except Exception as e:
-            print("An Error Occurred!!")
+            print("An Error Occurred!!  Error code: 01")
             print(e)
 
 
@@ -317,7 +321,6 @@ msg = """
 3: Delete records
 4: Update record
 5: Search records
-Press ctrl+C anywhere in the program to return here
 
 Enter Your Choice: """
 

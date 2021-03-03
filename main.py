@@ -16,11 +16,14 @@ initialize.init()
 cur.execute("use MedicalStore")
 
 msg = """
+==========    MEDICAL STORE    ==========
+
 0: quit
 1: Sales
 2: Stock
 3: Medicine Information
 4: Management
+Use ctrl+C in the program to go one step back
 """
 
 
@@ -53,5 +56,5 @@ while True:
         break
 
     except Exception as e:
-        print("An Error Occurred")
+        print("An Error Occurred!  Error Code: 00")
         print(e)
