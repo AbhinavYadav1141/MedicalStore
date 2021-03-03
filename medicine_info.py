@@ -283,12 +283,15 @@ def search():
 def init():
     print("=" * 10 + "     Medicine Information     " + "=" * 10)
     while True:
+        where = 0
         try:
             ch = input(msg)
             code = 1
 
             while ch not in '012345' or len(ch) != 1:
                 ch = input("Invalid choice. Enter again: ")
+
+            where = 1
 
             if ch == '0':
                 break
@@ -312,7 +315,8 @@ def init():
                 break
 
         except KeyboardInterrupt:
-            pass
+            if where == 0:
+                break
 
         except Exception as e:
             print("An Error occurred!!")
@@ -327,7 +331,6 @@ msg = """
 3: Delete records
 4: Update records
 5: Search records
-Press ctrl+C anywhere in the program to return here
 
 Enter Your Choice: """
 

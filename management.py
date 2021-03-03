@@ -204,12 +204,15 @@ def init():
 
     a = 1
     while True:
+        where = 0
         try:
             print(msg)
             ch = input()
 
             while ch not in '01234' or len(ch) != 1:
                 ch = input("Invalid Choice! Enter again: ")
+
+            where = 1
 
             if ch == '0':
                 break
@@ -227,7 +230,8 @@ def init():
                 update()
 
         except KeyboardInterrupt:
-            pass
+            if where == 0:
+                break
 
         except Exception as e:
             print("An Error Occurred!!")
@@ -244,7 +248,6 @@ msg = """
 2: Insert record
 3: Delete record
 4: Update record
-Press ctrl+C anywhere in the program to return here
 
 Enter Your Choice: """
 
