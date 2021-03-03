@@ -158,7 +158,15 @@ def view():
         actions.format_print(["ReceiptNo", ], cur.fetchall())
 
     elif ch == '6':
-        condition = input("Enter condition: ")
+        condition = input('Enter condition(<column_name><operator>"<value>"): ')
+        while True:
+            try:
+                cur.execute(f"select 1+2 where {condition}")
+                cur.fetchall()
+                break
+            except Exception as e:
+                print(e)
+                condition = input('Your condition had above error! Enter again(<column_name><operator>"<value>"): ')
         try:
             cur.execute(f"select ReceiptNo from Sale where {condition}")
             actions.format_print(["ReceiptNo"], cur.fetchall())
@@ -232,6 +240,9 @@ def delete():
 
 def update():
     rec = input("Enter receipt no. of record to be updated: ")
+    receipts = actions.get_values("Sale", "ReceiptNo")
+    while rec not in receipts:
+        rec = input("Receipt no. you entered is not in table! Enter again: ")
     print("Enter new records. Leave blank to not update")
     receipt = input("Receipt No.: ")
     while receipt != '' and not receipt.isdigit():
@@ -273,6 +284,7 @@ def update():
     if time != '':
         cur.execute(f"update Sale set SaleTime={time} where ReceiptNo = {rec}")
         print("Updated successfully...")
+    conn.commit()
 
     ch = input("Enter 'y' if you want to change other info: ").lower()
 
@@ -280,10 +292,13 @@ def update():
         total_cp = total_sp = 0
         while True:
             bar = input("Enter barcode of medicine you want to update. Leave empty to quit: ").lower()
+            cur.execute("use Sales")
+            barcodes = actions.get_values(f"t{rec}", "Barcode")
+            while bar not in barcodes and bar != '':
+                bar = input("Barcode you entered is not in table! Enter again: ")
             if bar == '':
                 break
-            if not bar.isdigit():
-                bar = input("Barcode should be an integer! Enter again: ")
+            cur.execute("use MedicalStore")
 
             print("\nEnter new records. Leave empty to not update.")
             barcode = input("Barcode: ")
@@ -402,7 +417,6 @@ def search():
 
 
 def init():
-    print('\n')
     print("=" * 10 + "     Sale Information     " + "=" * 10)
     while True:
         try:
@@ -433,6 +447,9 @@ def init():
             if code == '0':
                 break
 
+        except KeyboardInterrupt:
+            pass
+
         except Exception as e:
             print("An Error Occurred!!")
             print(e)
@@ -440,14 +457,15 @@ def init():
 
 msg = """
 
-Enter Your Choice:
 0: Home
 1: View Sale Information
 2: Insert records
 3: Delete records
 4: Update record
 5: Search records
-"""
+Press ctrl+C anywhere in the program to return here
+
+Enter Your Choice: """
 
 if __name__ == '__main__':
     conn = connect(host='localhost', user='root', password='abhinav1')

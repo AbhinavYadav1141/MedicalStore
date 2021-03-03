@@ -47,7 +47,11 @@ while True:
             
         elif ch == '4':
             management.init()
-            
+
+    except KeyboardInterrupt:
+        print("\nBye Bye...")
+        break
+
     except Exception as e:
         print("An Error Occurred")
         print(e)

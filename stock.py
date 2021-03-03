@@ -173,13 +173,24 @@ def update():
         condition = f"BatchNo='{batch}'"
 
     elif ch == '3':
-        condition = input("Enter condition: ")
+        condition = input('Enter condition(<column_name><operator>"<value>"): ')
+        while True:
+            try:
+                cur.execute(f"select 1+2 where {condition}")
+                cur.fetchall()
+                break
+            except Exception as e:
+                print(e)
+                condition = input('Your condition had above error! Enter again(<column_name><operator>"<value>"): ')
 
     if ch in '23' and len(ch) == 1:
-        column = input("Which column do you want to update: ").lower()
-        columns = actions.get_columns("Stock")
-        while column not in columns:
+        columns_all = actions.get_columns("Stock")
+        col_dict = {i + 1: columns_all[i] for i in range(len(columns_all))}
+        print(col_dict)
+        column = input("Which column no. do you want to update: ").lower()
+        while column not in col_dict:
             column = input("Column you entered is not in table! Enter again: ").lower()
+        column = col_dict[int(column)]
         val = input("Enter value: ")
         try:
             actions.update("Stock", column, val, condition)
@@ -243,7 +254,15 @@ def search():
     elif ch == '4':
 
         try:
-            condition = input("Enter condition: ")
+            condition = input('Enter condition(<column_name><operator>"<value>": ')
+            while True:
+                try:
+                    cur.execute(f"select 1+2 where {condition}")
+                    cur.fetchall()
+                    break
+                except Exception as e:
+                    print(e)
+                    condition = input("Your condition had above error! Enter again: ")
             actions.format_print(actions.get_columns("Stock"),
                                  actions.search_by_condition("Stock", condition))
         except Exception as e:
@@ -252,7 +271,6 @@ def search():
 
 
 def init():
-    print('\n')
     print("=" * 10 + "     Stock Information     " + "=" * 10)
     while True:
         try:
@@ -283,6 +301,9 @@ def init():
             if code == '0':
                 break
 
+        except KeyboardInterrupt:
+            pass
+
         except Exception as e:
             print("An Error Occurred!!")
             print(e)
@@ -290,14 +311,15 @@ def init():
 
 msg = """
 
-Enter Your Choice:
 0: Home
 1: View Stock Information
 2: Insert records
 3: Delete records
 4: Update record
 5: Search records
-"""
+Press ctrl+C anywhere in the program to return here
+
+Enter Your Choice: """
 
 if __name__ == '__main__':
     conn = connect(host='localhost', user='root', password='abhinav1')

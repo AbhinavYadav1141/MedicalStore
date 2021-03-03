@@ -38,7 +38,7 @@ def view():
     print("0: Home")
     print("1: Management Information")
 
-    ch = input("Enter your choice")
+    ch = input("Enter your choice: ")
     while ch not in '0123' or len(ch) != 1:
         ch = input("Invalid choice! Enter again: ")
 
@@ -66,12 +66,12 @@ def view():
 
         else:
             query = f"""select Year, sum(CostPrice), sum(SellingPrice), sum(NetGain), 
-                        sum(NetGain)/sum(CostPrice)*100 from Management 
-                        having '{years.split('-')[1]}'>=Year and '{years.split('-')[0]}'<=Year group by Year"""
-            print(query)
+                        sum(NetGain)/sum(CostPrice)*100 from Management group by Year
+                        having year<= '{years.split('-')[1]}' and year>='{years.split('-')[0]}'"""
+
             cur.execute(query)
             values = cur.fetchall()
-            columns = actions.get_columns("Management")
+            columns = ("Year", "CostPrice", "SellingPrice", "NetGain", "NetPercent")
 
         actions.format_print(columns, values)
 
@@ -84,6 +84,7 @@ def insert():
         month = input(f"{sale.months}\nEnter month number: ")
         while not month.isdigit() or 1 >= int(month) >= 12:
             month = input("Month no. you entered is not valid! Enter again: ")
+        month = sale.months[int(month)]
 
         year = input("Enter year(yyyy): ")
         while not year.isdigit() or len(year) != 4:
@@ -107,20 +108,20 @@ def insert():
 
 
 def delete():
-    year = input("Enter year to be deleted(yyyy). Leave empty to delete everything: ")
-    while (not year.isdigit() or len(year) != 4) and year != '':
+    year = input('Enter year to be deleted(yyyy). Enter "y" to delete everything: ')
+    while (not year.isdigit() or len(year) != 4) and year != 'y':
         year = input("Year you entered is not correct! Enter again: ")
 
-    if year == '':
+    if year == 'y':
         cur.execute("delete from management")
 
     else:
-        month = input("Enter month(mm). Leave empty to delete whole year: ")
+        month = input('Enter month(mm). Enter "m" to delete whole year: ')
 
-        while (not month.isdigit() or len(month) != 2) and month != '':
+        while (not month.isdigit() or len(month) != 2) and month != 'm':
             month = input("Month you entered is not of correct format! Enter again: ")
 
-        if month == '':
+        if month == 'm':
             cur.execute(f"delete from Management where Year={year}")
 
         else:
@@ -133,28 +134,37 @@ def delete():
 def update():
     print()
     print("Enter Month and Year of record to be updated")
-    year = input("Year: ")
+    cur.execute("select month, year from Management")
+    month_year = cur.fetchall()
+    print(sale.months)
+    while True:
+        year = input("Year: ")
 
-    while not year.isdigit() or len(year) != 4:
-        year = input("Year you entered is not of correct format! Enter again: ")
+        while not year.isdigit() or len(year) != 4:
+            year = input("Year you entered is not of correct format! Enter again: ")
 
-    month = input("Month: ")
+        month = input("Month No. : ")
 
-    while not month.isdigit() or len(month) != 2:
-        month = input("Month you entered is not of correct format! Enter again: ")
+        while not month.isdigit() or int(month) not in sale.months:
+            month = input("Month no. you entered is not correct! Enter again: ")
+        month = sale.months[int(month)]
+        if (month, int(year),) not in month_year:
+            print("Month-year you entered is not in table! Enter again. ")
+        else:
+            break
 
     print()
     print("Enter new records. Leave empty to not update.")
-    print(sale.months)
     m = input("Month no.: ")
     while m != '' and (not m.isdigit() or int(m) not in sale.months):
         m = input("Month no. you entered is not valid! Enter again: ")
 
     if m != '':
         try:
-            cur.execute(f"update Management set Month={m} where Month={month} and Year={year}")
+            m = sale.months[int(m)]
+            cur.execute(f"update Management set Month='{m}' where Month='{month}' and Year={year}")
         except errors.IntegrityError:
-            print("This month already exists!!")
+            print("This month-year already exists!!")
             m = month
 
     else:
@@ -166,9 +176,9 @@ def update():
 
     if y != '':
         try:
-            cur.execute(f"update Management set Year={y} where Month={m} and Year={year}")
+            cur.execute(f"update Management set Year={y} where Month='{m}' and Year={year}")
         except errors.IntegrityError:
-            print("This month already exists!!")
+            print("This month-year already exists!!")
             y = year
     else:
         y = year
@@ -178,19 +188,18 @@ def update():
     while not cp.isdigit() and cp != '':
         cp = input("Cost price should be an integer! Enter again: ")
     cur.execute(f"""update Management set CostPrice={cp}, NetGain=SellingPrice-CostPrice,
-                NetPercent=NetGain/CostPrice*100 where Month={m} and Year={y}""")
+                NetPercent=NetGain/CostPrice*100 where Month='{m}' and Year={y}""")
 
     sp = input("Selling Price: ")
 
     while not sp.isdigit() and sp != '':
         sp = input("Selling price should be an integer! Enter again: ")
     cur.execute(f"""update Management set SellingPrice={sp}, NetGain=SellingPrice-CostPrice,
-                    NetPercent=NetGain/CostPrice*100 where Month={m} and Year={y}""")
+                    NetPercent=NetGain/CostPrice*100 where Month='{m}' and Year={y}""")
     print("Updated successfully...")
 
 
 def init():
-    print('\n')
     print("=" * 10 + "     Management Information     " + "=" * 10)
 
     a = 1
@@ -217,6 +226,9 @@ def init():
             elif ch == '4':
                 update()
 
+        except KeyboardInterrupt:
+            pass
+
         except Exception as e:
             print("An Error Occurred!!")
             print(e)
@@ -227,13 +239,14 @@ def init():
 
 msg = """
 
-Enter Your Choice:
 0: Home
 1: View Management Information
 2: Insert record
 3: Delete record
 4: Update record
-"""
+Press ctrl+C anywhere in the program to return here
+
+Enter Your Choice: """
 
 if __name__ == "__main__":
     conn = connect(host='localhost', user='root', password='abhinav1')
