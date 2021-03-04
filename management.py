@@ -232,6 +232,7 @@ def init():
                 update()
 
         except KeyboardInterrupt:
+            cur.execute("use MedicalStore")
             if where == 0:
                 break
 
