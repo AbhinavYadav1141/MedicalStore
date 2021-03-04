@@ -243,7 +243,7 @@ def search():
         while not batch.isdigit():
             batch = input("Batch no. should only be integer. Enter again: ")
         actions.format_print(columns_all,
-                             actions.search_by_condition("Stock", f"BatchNo={batch}"))
+                             actions.search_by_condition("Stock", f"BatchNo like '%{batch}%'"))
 
     elif ch == '3':
         num = input("Enter no. of columns you want to use: ")
@@ -259,10 +259,8 @@ def search():
                 col = input("The column no. you entered is not in option. Please enter again: ")
             col = col_dict[int(col)]
             val = input(f"Enter value for column{i + 1}: ")
-            op = input("Enter operator (<, =, >, >=, <=): ")
-            while op not in ['<', '>', '=', '<=', '>=']:
-                op = input("Wrong operator! Please enter again: ")
-            condition += col + op + "'" + val + "'"
+            op = " like "
+            condition += col + op + "'%" + val + "%'"
             if i != int(num) - 1:
                 condition += '&&'
         actions.format_print(columns_all, actions.search_by_condition("Stock", condition))

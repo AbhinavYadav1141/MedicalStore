@@ -267,10 +267,9 @@ def search():
                 col = input("The column no. you entered is not in option. Please enter again: ")
             col = col_dict[int(col)]
             val = input(f"Enter value for column{i + 1}: ")
-            op = input("Enter operator (<, =, >, >=, <=): ")
-            while op not in ['<', '>', '=', '<=', '>=']:
-                op = input("Wrong operator! Please enter again: ")
-            condition += col + op + "'" + val + "'"
+            op = " like "
+            
+            condition += col + op + "'%" + val + "%'"
             if i != int(num) - 1:
                 condition += ' && '
 

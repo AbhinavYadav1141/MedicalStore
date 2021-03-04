@@ -373,12 +373,14 @@ def search():
         receipt = input("Enter Receipt No.: ")
         while not receipt.isdigit():
             receipt = input("Receipt No. should be an integer! Enter again: ")
-
-        print_format(receipt)
+        
+        cur.execute(f"select * from Sale where ReceiptNo like '%{receipt}%'")
+        data = cur.fetchall()
+        actions.format_print(actions.get_columns("Sale"), data)
 
     elif ch == '3':
         name = input("Enter Customer Name: ")
-        actions.format_print(actions.get_columns("Sale"), actions.search("Sale", "CustomerName", name, "="))
+        actions.format_print(actions.get_columns("Sale"), actions.search("Sale", "CustomerName", "%"+name+"%", " like "))
 
     elif ch == '4':
         start = input("Enter starting date(yyyy-mm-dd): ")
