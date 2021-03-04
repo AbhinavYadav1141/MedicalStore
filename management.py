@@ -6,7 +6,7 @@ import traceback
 
 def create_record(month, year, cost, sell):
     query = f"""insert into Management values(
-    '{month}', '{year}', {cost}, {sell}, SellingPrice-CostPrice, NetGain*100/CoStPrice)"""
+    '{month}', '{year}', {cost}, {sell}, SellingPrice-CostPrice, NetGain*100/CostPrice)"""
     cur.execute(query)
     conn.commit()
 
@@ -117,7 +117,8 @@ def delete():
         cur.execute("delete from management")
 
     else:
-        month = input('Enter month(mm). Enter "m" to delete whole year: ')
+        print(sale.months)
+        month = input('Enter month no. Enter "m" to delete whole year: ')
 
         while (not month.isdigit() or len(month) != 2) and month != 'm':
             month = input("Month you entered is not of correct format! Enter again: ")

@@ -115,7 +115,7 @@ def insert():
     while not exp:
         exp = input("Your date format is nor correct! Enter again(yyyy-mm-dd): ")
         exp = actions.check_date(exp)
-    print("Expiry date: exp")
+    print(f"Expiry date: {exp}")
 
     create_record(batch, bar, cp, p_date, qty, mfg, exp)
     print("Created record successfully...")
@@ -148,7 +148,9 @@ def delete():
         print("Deleted successfully...")
 
     elif ch == '3':
-        condition = input("Enter condition for deletion: ")
+        print("All columns are: ")
+        print(actions.get_columns("Stock"))
+        condition = input('Enter condition for deletion(<column_name><operator>"<value>"): ')
         try:
             actions.delete_by_condition("Stock", condition)
             print("Deleted successfully...")
@@ -184,6 +186,8 @@ def update():
         condition = f"BatchNo='{batch}'"
 
     elif ch == '3':
+        print("All columns are: ")
+        print(actions.get_columns("Stock"))
         condition = input('Enter condition(<column_name><operator>"<value>"): ')
         while True:
             try:
@@ -268,7 +272,7 @@ def search():
         try:
             print("All columns are:")
             print(columns_all)
-            condition = input('Enter condition(<column_name><operator>"<value>": ')
+            condition = input('Enter condition(<column_name><operator>"<value>"): ')
             while True:
                 try:
                     cur.execute(f"select 1+2 from Stock where {condition}")

@@ -146,7 +146,9 @@ def delete():
         print("Deleted record successfully...")
 
     elif ch == '4':
-        condition = input("Enter condition for deletion: ")
+        print("All columns are")
+        print(actions. get_columns("MedicineInfo"))
+        condition = input('Enter condition for deletion(<column_name><operator>"<value>"): ')
         try:
             actions.delete_by_condition("MedicineInfo", condition)
             print("Deleted record(s) successfully...")
@@ -186,6 +188,8 @@ def update():
         condition = f"Name='{name}'"
 
     elif ch == '4':
+        print("All columns are")
+        print(actions. get_columns("MedicineInfo"))
         condition = input('Enter condition(<column_name><operator>"<value>"): ')
         while True:
             try:

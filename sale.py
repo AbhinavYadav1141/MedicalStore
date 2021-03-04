@@ -160,6 +160,8 @@ def view():
         actions.format_print(["ReceiptNo", ], cur.fetchall())
 
     elif ch == '6':
+        print("All columns are")
+        print(actions.get_columns("Sale"))
         condition = input('Enter condition(<column_name><operator>"<value>"): ')
         while True:
             try:
