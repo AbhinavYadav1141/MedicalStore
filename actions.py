@@ -1,5 +1,6 @@
 from mysql.connector import connect
 import mysql
+import traceback
 
 
 def delete_record(table, column, value):
@@ -178,13 +179,18 @@ def date_format(*args):
 
 
 def check_date(dt: str):
+    dt=str(dt)
     try:
-        cur.execute(f"select date({dt})")
+        q = f"select date('{dt}')"
+        cur.execute(q)
         dt = cur.fetchall()[0][0]
     except mysql.connector.errors.ProgrammingError:
+        traceback.print_exc()
         return False
     except:
+        traceback.print_exc()
         return False
+       
     if dt is None:
         return False
     else:

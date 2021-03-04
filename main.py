@@ -7,7 +7,7 @@ import sale
 import stock
 import traceback
 
-conn = connect(user='root', passwd='abhinav1')
+conn = connect(user='root', passwd='1234')
 cur = conn.cursor()
 
 medicine_info.conn = sale.conn = stock.conn = management.conn = initialize.conn = actions.conn = conn
