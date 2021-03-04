@@ -33,11 +33,12 @@ while True:
         print(msg)
         ch = input("Enter your choice: ")
         
-        while ch not in '01234' or len(ch) > 1:
+        while ch not in '01234' or len(ch) != 1:
             ch = input("Invalid choice! Enter again")
             
         if ch == '0':
             print("Bye bye...")
+            conn.close()
             break
             
         elif ch == '1':
@@ -54,6 +55,7 @@ while True:
 
     except KeyboardInterrupt:
         print("\nBye Bye...")
+        conn.close()
         break
 
     except Exception as e:
