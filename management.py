@@ -120,14 +120,15 @@ def delete():
         print(sale.months)
         month = input('Enter month no. Enter "m" to delete whole year: ')
 
-        while (not month.isdigit() or len(month) != 2) and month != 'm':
+        while (not month.isdigit() or int(month) not in sale.months) and month != 'm':
             month = input("Month you entered is not of correct format! Enter again: ")
 
         if month == 'm':
             cur.execute(f"delete from Management where Year={year}")
 
         else:
-            cur.execute(f"delete from Management where Year={year} and Month={month}")
+            month = sale.months[int(month)]
+            cur.execute(f"delete from Management where Year={year} and Month='{month}'")
 
     conn.commit()
     print("Deleted successfully...")
@@ -189,14 +190,17 @@ def update():
 
     while not cp.isdigit() and cp != '':
         cp = input("Cost price should be an integer! Enter again: ")
-    cur.execute(f"""update Management set CostPrice={cp}, NetGain=SellingPrice-CostPrice,
-                NetPercent=NetGain/CostPrice*100 where Month='{m}' and Year={y}""")
+    if cp != '':
+        q=f"""update Management set CostPrice={cp}, NetGain=SellingPrice-CostPrice,
+                    NetPercent=NetGain/CostPrice*100 where Month='{m}' and Year={y}"""
+        cur.execute(q)
 
     sp = input("Selling Price: ")
 
     while not sp.isdigit() and sp != '':
         sp = input("Selling price should be an integer! Enter again: ")
-    cur.execute(f"""update Management set SellingPrice={sp}, NetGain=SellingPrice-CostPrice,
+    if sp != '':
+        cur.execute(f"""update Management set SellingPrice={sp}, NetGain=SellingPrice-CostPrice,
                     NetPercent=NetGain/CostPrice*100 where Month='{m}' and Year={y}""")
     print("Updated successfully...")
 

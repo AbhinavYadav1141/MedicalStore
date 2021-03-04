@@ -70,7 +70,7 @@ def view():
 
     elif ch == '5':
         columns = actions.input_cols("MedicineInfo")
-        column = input("Which column no. do you want to use for record matching").lower()
+        column = input("Which column no. do you want to use for record matching: ").lower()
         while not column.isdigit() or int(column) not in col_dict:
             column = input("Column no. you entered is not in option. Please enter again: ").lower()
         column = col_dict[int(column)]
@@ -81,8 +81,9 @@ def view():
             for i in range(1, len(records)):
                 q += f"or {column} like '%{records[i]}%' "
             cur.execute(q)
+            actions.format_print(columns, cur.fetchall())
         else:
-            actions.format_print(columns_all, actions.search_multiple("MedicineInfo", column, records))
+            actions.format_print(columns, actions.search_multiple("MedicineInfo", column, records))
 
 
 def insert(bar=None):
