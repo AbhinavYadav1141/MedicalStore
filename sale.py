@@ -1,3 +1,8 @@
+"""
+this module can be used to handle sale related matters
+"""
+
+
 import traceback
 
 from mysql.connector import connect
@@ -160,10 +165,12 @@ def view():
         actions.format_print(["ReceiptNo", ], cur.fetchall())
 
     elif ch == '6':
+        print("All columns are")
+        print(actions.get_columns("Sale"))
         condition = input('Enter condition(<column_name><operator>"<value>"): ')
         while True:
             try:
-                cur.execute(f"select 1+2 where {condition}")
+                cur.execute(f"select 1+2 from Sale where {condition}")
                 cur.fetchall()
                 break
             except Exception as e:
@@ -175,6 +182,7 @@ def view():
         except Exception as e:
             print("Your condition had an error!!")
             print(e)
+            traceback.print_exc()
 
     records = []
     receipts = actions.get_values("Sale", "ReceiptNo")
@@ -230,7 +238,8 @@ def delete():
         sp, cp, date = cur.fetchall()[0]
         date = str(date.isoformat())
         month = months[int(date.split('-')[1])]
-        year = date.split()[0]
+        year = date.split("-")[0]
+
         management.update_record(month, year, -int(cp), -int(sp))
         cur.execute(f"delete from Sale where ReceiptNo='{receipt}'")
         cur.execute("use Sales")
@@ -252,13 +261,13 @@ def update():
 
     if receipt != '':
         cur.execute(f"update Sale set ReceiptNo={receipt} where ReceiptNo = {rec}")
-        cur.execute(f"alter table Sales.t{rec} rename t{receipt}")
+        cur.execute(f"alter table Sales.t{rec} rename Sales.t{receipt}")
         print("Updated successfully...")
         rec = receipt
 
     name = input("Customer Name: ")
     if name != '':
-        cur.execute(f"update Sale set name={name} where ReceiptNo = {rec}")
+        cur.execute(f"update Sale set CustomerName={name} where ReceiptNo = {rec}")
         print("Updated successfully...")
 
     count = input("No. of medicines sold: ")
@@ -272,11 +281,14 @@ def update():
     date = input("Date (yyyy-mm-dd): ")
     cur.execute(f"select SaleDate from Sale where ReceiptNo={rec}")
     old_date = cur.fetchall()[0][0]
-    while not actions.check_date(date) and date != '':
+    dt = actions.check_date(date)
+    while not dt and date != '':
         date = input("Date you entered is not of correct format! Enter again: ")
+        dt = actions.check_date(date)
 
     if date != '':
-        cur.execute(f"update Sale set SaleDate={date} where ReceiptNo = {rec}")
+        print(f"Date: {dt}")
+        cur.execute(f"update Sale set SaleDate={dt} where ReceiptNo = {rec}")
         print("Updated successfully...")
 
     time = input("Time (hh:mm:ss)")
@@ -289,6 +301,7 @@ def update():
     conn.commit()
 
     ch = input("Enter 'y' if you want to change other info: ").lower()
+    receipt = rec
 
     if ch == 'y':
         total_cp = total_sp = 0
@@ -300,14 +313,13 @@ def update():
                 bar = input("Barcode you entered is not in table! Enter again: ")
             if bar == '':
                 break
-            cur.execute("use MedicalStore")
 
             print("\nEnter new records. Leave empty to not update.")
             barcode = input("Barcode: ")
             while not barcode.isdigit() and barcode != '':
                 barcode = input("Barcode should be an integer! Enter again: ")
             if barcode != '':
-                cur.execute(f"update t{receipt} set Barcode={barcode} where Barcode={bar}")
+                cur.execute(f"update Sales.t{rec} set Barcode={barcode} where Barcode={bar}")
                 print("Updated successfully...")
             if barcode == '':
                 barcode = bar
@@ -317,9 +329,9 @@ def update():
                 cp = input("Cost Price should be an integer! Enter again: ")
 
             if cp != '':
-                cur.execute(f"select CostPrice from t{receipt} where Barcode={barcode}")
+                cur.execute(f"select CostPrice from t{rec} where Barcode={barcode}")
                 old_cp = cur.fetchall()[0][0]
-                cur.execute(f"update t{receipt} set CostPrice={cp} where Barcode={barcode}")
+                cur.execute(f"update t{rec} set CostPrice={cp} where Barcode={barcode}")
                 print("Updated successfully...")
                 total_cp += int(cp) - int(old_cp)
 
@@ -328,15 +340,16 @@ def update():
                 sp = input("Selling Price should be an integer! Enter again: ")
 
             if sp != '':
-                cur.execute(f"select SellingPrice from t{receipt} where Barcode={barcode}")
+                cur.execute(f"select SellingPrice from t{rec} where Barcode={barcode}")
                 old_sp = cur.fetchall()[0][0]
                 cur.execute(f"update t{receipt} set SellingPrice={sp} where Barcode={barcode}")
+                
                 print("Updated successfully...")
                 total_sp += int(sp) - int(old_sp)
             print("Record Updated...")
-
-        month = months[int(old_date.split('-')[1])]
-        year = old_date.split('-')[0]
+        cur.execute("use MedicalStore")
+        month = months[int(str(old_date).split('-')[1])]
+        year = str(old_date).split('-')[0]
         management.update_record(month, year, total_cp, total_sp)
 
 
@@ -365,21 +378,29 @@ def search():
         receipt = input("Enter Receipt No.: ")
         while not receipt.isdigit():
             receipt = input("Receipt No. should be an integer! Enter again: ")
-
-        print_format(receipt)
+        
+        cur.execute(f"select * from Sale where ReceiptNo like '%{receipt}%'")
+        data = cur.fetchall()
+        actions.format_print(actions.get_columns("Sale"), data)
 
     elif ch == '3':
         name = input("Enter Customer Name: ")
-        actions.format_print(actions.get_columns("Sale"), actions.search("Sale", "CustomerName", name, "="))
+        actions.format_print(actions.get_columns("Sale"), actions.search("Sale", "CustomerName", "%"+name+"%", " like "))
 
     elif ch == '4':
         start = input("Enter starting date(yyyy-mm-dd): ")
-        while not actions.check_date(start):
+        start = actions.check_date(start)
+        while not start:
             start = input("Date you entered is not of correct format! Enter again(yyyy-mm-dd): ")
+            start = actions.check_date(start)
+        print(f"Starting Date: {start}")
 
         end = input("Enter ending date(yyyy-mm-dd): ")
-        while not actions.check_date(end):
+        end = actions.check_date(end)
+        while not end:
             end = input("Date you entered is not of correct format! Enter again(yyyy-mm-dd): ")
+            end = actions.check_date(end)
+        print(f"Ending Date: {end}")
 
         actions.format_print(actions.get_columns("Sale"),
                              actions.search_by_condition("Sale", f"'{end}'>=SaleDate and SaleDate>='{start}'"))
@@ -398,12 +419,18 @@ def search():
 
     elif ch == '6':
         start1 = input("Enter starting date(yyyy-mm-dd): ")
-        while not actions.check_date(start1):
+        start1 = actions.check_date(start1)
+        while not start1:
             start1 = input("Date you entered is not of correct format! Enter again(yyyy-mm-dd): ")
+            start1 = actions.check_date(start1)
+        print(f"Starting date: {start1}")
 
         end1 = input("Enter ending date(yyyy-mm-dd): ")
-        while not actions.check_date(end1):
+        end1 = actions.check_date(end1)
+        while not end1:
             end1 = input("Date you entered is not of correct format! Enter again(yyyy-mm-dd): ")
+            end1 = actions.check_date(end1)
+        print(f"Ending Date: {end1}")
 
         start2 = input("Enter starting time(hh:mm:ss): ")
         while not actions.check_time(start2):
@@ -453,11 +480,12 @@ def init():
                 break
 
         except KeyboardInterrupt:
+            cur.execute("use MedicalStore")
             if where == 0:
                 break
 
         except Exception as e:
-            print("An Error Occurred!! Error code: 02")
+            print("An Error Occurred!! Error code: 01")
             print(e)
             traceback.print_exc()
 

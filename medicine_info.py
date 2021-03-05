@@ -1,5 +1,11 @@
+"""
+this module can be used for info about medicines
+"""
+
+
 from mysql.connector import connect
 import actions
+import traceback
 
 
 def create_record(barcode, name, m_type, composition):
@@ -69,7 +75,7 @@ def view():
 
     elif ch == '5':
         columns = actions.input_cols("MedicineInfo")
-        column = input("Which column no. do you want to use for record matching").lower()
+        column = input("Which column no. do you want to use for record matching: ").lower()
         while not column.isdigit() or int(column) not in col_dict:
             column = input("Column no. you entered is not in option. Please enter again: ").lower()
         column = col_dict[int(column)]
@@ -80,8 +86,9 @@ def view():
             for i in range(1, len(records)):
                 q += f"or {column} like '%{records[i]}%' "
             cur.execute(q)
+            actions.format_print(columns, cur.fetchall())
         else:
-            actions.format_print(columns_all, actions.search_multiple("MedicineInfo", column, records))
+            actions.format_print(columns, actions.search_multiple("MedicineInfo", column, records))
 
 
 def insert(bar=None):
@@ -145,7 +152,9 @@ def delete():
         print("Deleted record successfully...")
 
     elif ch == '4':
-        condition = input("Enter condition for deletion: ")
+        print("All columns are")
+        print(actions. get_columns("MedicineInfo"))
+        condition = input('Enter condition for deletion(<column_name><operator>"<value>"): ')
         try:
             actions.delete_by_condition("MedicineInfo", condition)
             print("Deleted record(s) successfully...")
@@ -185,15 +194,17 @@ def update():
         condition = f"Name='{name}'"
 
     elif ch == '4':
+        print("All columns are")
+        print(actions. get_columns("MedicineInfo"))
         condition = input('Enter condition(<column_name><operator>"<value>"): ')
         while True:
             try:
-                cur.execute(f"select 1+2 where {condition}")
+                cur.execute(f"select 1+2 from MedicineInfo where {condition}")
                 cur.fetchall()
                 break
             except Exception as e:
                 print(e)
-                condition = input('Your condition had above error! Enter again(<column_name><operator>"<value>"): ')
+                condition = input('Your condition had above error! \nEnter again(<column_name><operator>"<value>"): ')
 
     if ch in '234' and len(ch) == 1:
         columns_all = actions.get_columns("MedicineInfo")
@@ -208,7 +219,7 @@ def update():
             actions.update("MedicineInfo", column, val, condition)
             print("Updated records successfully...")
         except Exception as e:
-            print("Your condition had bellow error!")
+            print("Your condition had below error!")
             print(e)
 
 
@@ -222,6 +233,9 @@ def search():
     print("0: Home")
     print("1: Medicine information")
     ch = input("Enter your choice: ")
+
+    columns_all = actions.get_columns("MedicineInfo")
+    col_dict = {i + 1: columns_all[i] for i in range(len(columns_all))}
 
     while ch not in '012345' or len(ch) != 1:
         ch = input("Invalid choice. Enter again: ")
@@ -249,8 +263,6 @@ def search():
         while not num.isdigit():
             num = input("Enter integer value only: ")
 
-        columns_all = actions.get_columns("MedicineInfo")
-        col_dict = {i+1: columns_all[i] for i in range(len(columns_all))}
         print("The columns are:")
         print(str(col_dict).lstrip('{').rstrip('}'))
         condition = ''
@@ -260,24 +272,33 @@ def search():
                 col = input("The column no. you entered is not in option. Please enter again: ")
             col = col_dict[int(col)]
             val = input(f"Enter value for column{i + 1}: ")
-            op = input("Enter operator (<, =, >, >=, <=): ")
-            while op not in ['<', '>', '=', '<=', '>=']:
-                op = input("Wrong operator! Please enter again: ")
-            condition += col + op + "'" + val + "'"
+            op = " like "
+            
+            condition += col + op + "'%" + val + "%'"
             if i != int(num) - 1:
-                condition += '&&'
-        print(condition)
+                condition += ' && '
+
         actions.format_print(columns_all, actions.search_by_condition("MedicineInfo", condition))
 
     elif ch == '5':
 
         try:
-            condition = input("Enter condition: ")
-            actions.format_print(actions.get_columns("MedicineInfo"),
+            print("All columns are:")
+            print(columns_all)
+            condition = input('Enter condition(<column_name><operator>"<value>": ')
+            while True:
+                try:
+                    cur.execute(f"select 1+2 from MedicineInfo where {condition}")
+                    cur.fetchall()
+                    break
+                except Exception as e:
+                    print(e)
+                    condition = input("Your condition had above error! Enter again: ")
+            actions.format_print(columns_all,
                                  actions.search_by_condition("MedicineInfo", condition))
         except Exception as e:
-            print("Your condition had an error!!")
             print(e)
+            print("There was an error!!  Error code: 022")
 
 
 def init():
@@ -315,12 +336,14 @@ def init():
                 break
 
         except KeyboardInterrupt:
+            cur.execute("use MedicalStore")
             if where == 0:
                 break
 
         except Exception as e:
-            print("An Error occurred!!")
+            print("An Error occurred!! Error code: 04")
             print(e)
+            traceback.print_exc()
 
 
 msg = """

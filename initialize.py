@@ -1,3 +1,8 @@
+"""
+this module creates databases and tables
+"""
+
+
 from mysql.connector import connect
 
 
@@ -7,9 +12,9 @@ def init():
         "create database if not exists MedicalStore",
         "create database if not exists Sales",
         "use MedicalStore",
-        """create table if not exists MedicineInfo (Barcode int PRIMARY KEY, Name varchar(40),
-         Type varchar(20), Composition varchar(200))""",
-        """create table if not exists Sale (ReceiptNo int PRIMARY KEY, CustomerName varchar(30),
+        """create table if not exists MedicineInfo (Barcode int PRIMARY KEY, Name varchar(100),
+         Type varchar(100), Composition varchar(500))""",
+        """create table if not exists Sale (ReceiptNo int PRIMARY KEY, CustomerName varchar(100),
          TypeCount int, SaleDate date, SaleTime char(8), CostPrice int, SellingPrice int)""",
         """create table if not exists Stock (BatchNo int PRIMARY KEY, Barcode int, CostPrice int,
          PurchaseDate date, QuantityLeft int, Mfg date, Exp date)""",
@@ -24,6 +29,6 @@ def init():
 
 
 if __name__ == '__main__':
-    conn = connect(host='localhost', user='root', password='abhinav1')
+    conn = connect(host='localhost', user='root', password='1234')
     cur = conn.cursor()
     init()

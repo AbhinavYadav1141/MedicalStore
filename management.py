@@ -1,11 +1,18 @@
+"""
+this module can be used in management related topics
+like seeing overall profits, cost etc.
+"""
+
+
 from mysql.connector import connect, errors
 import actions
 import sale
+import traceback
 
 
 def create_record(month, year, cost, sell):
     query = f"""insert into Management values(
-    '{month}', '{year}', {cost}, {sell}, SellingPrice-CostPrice, NetGain*100/CoStPrice)"""
+    '{month}', '{year}', {cost}, {sell}, SellingPrice-CostPrice, NetGain*100/CostPrice)"""
     cur.execute(query)
     conn.commit()
 
@@ -116,16 +123,18 @@ def delete():
         cur.execute("delete from management")
 
     else:
-        month = input('Enter month(mm). Enter "m" to delete whole year: ')
+        print(sale.months)
+        month = input('Enter month no. Enter "m" to delete whole year: ')
 
-        while (not month.isdigit() or len(month) != 2) and month != 'm':
+        while (not month.isdigit() or int(month) not in sale.months) and month != 'm':
             month = input("Month you entered is not of correct format! Enter again: ")
 
         if month == 'm':
             cur.execute(f"delete from Management where Year={year}")
 
         else:
-            cur.execute(f"delete from Management where Year={year} and Month={month}")
+            month = sale.months[int(month)]
+            cur.execute(f"delete from Management where Year={year} and Month='{month}'")
 
     conn.commit()
     print("Deleted successfully...")
@@ -187,14 +196,17 @@ def update():
 
     while not cp.isdigit() and cp != '':
         cp = input("Cost price should be an integer! Enter again: ")
-    cur.execute(f"""update Management set CostPrice={cp}, NetGain=SellingPrice-CostPrice,
-                NetPercent=NetGain/CostPrice*100 where Month='{m}' and Year={y}""")
+    if cp != '':
+        q=f"""update Management set CostPrice={cp}, NetGain=SellingPrice-CostPrice,
+                    NetPercent=NetGain/CostPrice*100 where Month='{m}' and Year={y}"""
+        cur.execute(q)
 
     sp = input("Selling Price: ")
 
     while not sp.isdigit() and sp != '':
         sp = input("Selling price should be an integer! Enter again: ")
-    cur.execute(f"""update Management set SellingPrice={sp}, NetGain=SellingPrice-CostPrice,
+    if sp != '':
+        cur.execute(f"""update Management set SellingPrice={sp}, NetGain=SellingPrice-CostPrice,
                     NetPercent=NetGain/CostPrice*100 where Month='{m}' and Year={y}""")
     print("Updated successfully...")
 
@@ -230,12 +242,14 @@ def init():
                 update()
 
         except KeyboardInterrupt:
+            cur.execute("use MedicalStore")
             if where == 0:
                 break
 
         except Exception as e:
-            print("An Error Occurred!!")
+            print("An Error Occurred!!  Error code: 04")
             print(e)
+            traceback.print_exc()
 
         if a == '0':
             break

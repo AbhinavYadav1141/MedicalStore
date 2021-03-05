@@ -1,3 +1,8 @@
+"""
+this is the main module that is to be run
+"""
+
+
 from mysql.connector import connect
 import actions
 import initialize
@@ -5,8 +10,9 @@ import management
 import medicine_info
 import sale
 import stock
+import traceback
 
-conn = connect(user='root', passwd='abhinav1')
+conn = connect(user='root', passwd='1234')
 cur = conn.cursor()
 
 medicine_info.conn = sale.conn = stock.conn = management.conn = initialize.conn = actions.conn = conn
@@ -32,11 +38,12 @@ while True:
         print(msg)
         ch = input("Enter your choice: ")
         
-        while ch not in '01234' or len(ch) > 1:
+        while ch not in '01234' or len(ch) != 1:
             ch = input("Invalid choice! Enter again")
             
         if ch == '0':
             print("Bye bye...")
+            conn.close()
             break
             
         elif ch == '1':
@@ -53,8 +60,10 @@ while True:
 
     except KeyboardInterrupt:
         print("\nBye Bye...")
+        conn.close()
         break
 
     except Exception as e:
         print("An Error Occurred!  Error Code: 00")
         print(e)
+        traceback.print_exc()
