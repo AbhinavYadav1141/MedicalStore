@@ -184,7 +184,7 @@ def date_format(*args):
 
 
 def check_date(dt: str):
-    dt=str(dt)
+    dt = str(dt)
     try:
         q = f"select date('{dt}')"
         cur.execute(q)
