@@ -251,12 +251,12 @@ def search():
         while not barcode.isdigit():
             barcode = input("Barcode should only be integer. Enter again: ")
         actions.format_print(actions.get_columns("MedicineInfo"),
-                             actions.search_by_condition("MedicineInfo", f"barcode={barcode}"))
+                             actions.search_by_condition("MedicineInfo", f"barcode like '%{barcode}%'"))
 
     elif ch == '3':
         name = input("Enter name of medicine: ")
         actions.format_print(actions.get_columns("MedicineInfo"),
-                             actions.search_by_condition("MedicineInfo", f"name='{name}'"))
+                             actions.search_by_condition("MedicineInfo", f"name like '%{name}%'"))
 
     elif ch == '4':
         num = input("Enter no. of columns you want to use: ")
