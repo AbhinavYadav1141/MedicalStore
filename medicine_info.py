@@ -1,3 +1,8 @@
+"""
+this module can be used for info about medicines
+"""
+
+
 from mysql.connector import connect
 import actions
 import traceback

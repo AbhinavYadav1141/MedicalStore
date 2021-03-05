@@ -1,3 +1,8 @@
+"""
+this module can be used to handle sale related matters
+"""
+
+
 import traceback
 
 from mysql.connector import connect

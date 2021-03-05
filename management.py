@@ -1,3 +1,9 @@
+"""
+this module can be used in management related topics
+like seeing overall profits, cost etc.
+"""
+
+
 from mysql.connector import connect, errors
 import actions
 import sale

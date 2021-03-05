@@ -1,3 +1,8 @@
+"""
+this file contains useful functions used in other modules
+"""
+
+
 from mysql.connector import connect
 import mysql
 import traceback

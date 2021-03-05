@@ -1,3 +1,8 @@
+"""
+this module can be used to manage stock information
+"""
+
+
 from mysql.connector import connect
 import actions
 import traceback

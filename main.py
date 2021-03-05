@@ -1,3 +1,8 @@
+"""
+this is the main module that is to be run
+"""
+
+
 from mysql.connector import connect
 import actions
 import initialize
