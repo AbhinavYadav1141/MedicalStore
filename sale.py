@@ -264,14 +264,14 @@ def update():
         receipt = input("Receipt no. should be an integer! Enter again: ")
 
     if receipt != '':
-        cur.execute(f"update Sale set ReceiptNo={receipt} where ReceiptNo = {rec}")
+        cur.execute(f"update Sale set ReceiptNo='{receipt}' where ReceiptNo = '{rec}'")
         cur.execute(f"alter table Sales.t{rec} rename Sales.t{receipt}")
         print("Updated successfully...")
         rec = receipt
 
     name = input("Customer Name: ")
     if name != '':
-        cur.execute(f"update Sale set CustomerName={name} where ReceiptNo = {rec}")
+        cur.execute(f"update Sale set CustomerName='{name}' where ReceiptNo = '{rec}'")
         print("Updated successfully...")
 
     count = input("No. of medicines sold: ")
@@ -279,11 +279,11 @@ def update():
         count = input("No. of medicines should be an integer! Enter again: ")
 
     if count != '':
-        cur.execute(f"update Sale set TypeCount={count} where ReceiptNo = {rec}")
+        cur.execute(f"update Sale set TypeCount='{count}' where ReceiptNo = '{rec}'")
         print("Updated successfully...")
 
     date = input("Date (yyyy-mm-dd): ")
-    cur.execute(f"select SaleDate from Sale where ReceiptNo={rec}")
+    cur.execute(f"select SaleDate from Sale where ReceiptNo='{rec}'")
     old_date = cur.fetchall()[0][0]
     dt = actions.check_date(date)
     while not dt and date != '':
@@ -292,7 +292,7 @@ def update():
 
     if date != '':
         print(f"Date: {dt}")
-        cur.execute(f"update Sale set SaleDate={dt} where ReceiptNo = {rec}")
+        cur.execute(f"update Sale set SaleDate='{dt}' where ReceiptNo = '{rec}'")
         print("Updated successfully...")
 
     time = input("Time (hh:mm:ss)")
@@ -300,7 +300,7 @@ def update():
         time = input("Time you entered is not of correct format! Enter again: ")
 
     if time != '':
-        cur.execute(f"update Sale set SaleTime={time} where ReceiptNo = {rec}")
+        cur.execute(f"update Sale set SaleTime='{time}' where ReceiptNo = '{rec}'")
         print("Updated successfully...")
     conn.commit()
 
@@ -323,7 +323,7 @@ def update():
             while not barcode.isdigit() and barcode != '':
                 barcode = input("Barcode should be an integer! Enter again: ")
             if barcode != '':
-                cur.execute(f"update Sales.t{rec} set Barcode={barcode} where Barcode={bar}")
+                cur.execute(f"update Sales.t{rec} set Barcode='{barcode}' where Barcode={bar}")
                 print("Updated successfully...")
             if barcode == '':
                 barcode = bar
@@ -335,7 +335,7 @@ def update():
             if cp != '':
                 cur.execute(f"select CostPrice from t{rec} where Barcode={barcode}")
                 old_cp = cur.fetchall()[0][0]
-                cur.execute(f"update t{rec} set CostPrice={cp} where Barcode={barcode}")
+                cur.execute(f"update t{rec} set CostPrice='{cp}' where Barcode={barcode}")
                 print("Updated successfully...")
                 total_cp += int(cp) - int(old_cp)
 
@@ -346,7 +346,7 @@ def update():
             if sp != '':
                 cur.execute(f"select SellingPrice from t{rec} where Barcode={barcode}")
                 old_sp = cur.fetchall()[0][0]
-                cur.execute(f"update t{receipt} set SellingPrice={sp} where Barcode={barcode}")
+                cur.execute(f"update t{receipt} set SellingPrice='{sp}' where Barcode={barcode}")
                 
                 print("Updated successfully...")
                 total_sp += int(sp) - int(old_sp)
