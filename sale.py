@@ -130,11 +130,12 @@ def view():
     print("4: many records using Receipt No.")
     print("5: All Receipt Numbers")
     print("6: Receipt numbers by condition")
+    print("7: All costumers")
     print("0: Go to home")
     print("1: Go to Medicine Information")
     ch = input()
 
-    while ch not in '0123456' or len(ch) != 1:
+    while ch not in '01234567' or len(ch) != 1:
         ch = input("Invalid choice. Enter again: ")
 
     num = 0
@@ -183,6 +184,9 @@ def view():
             print("Your condition had an error!!")
             print(e)
             traceback.print_exc()
+
+    elif ch == '7':
+        actions.format_print(actions.get_columns("Sale"), actions.show_all("Sale"))
 
     records = []
     receipts = actions.get_values("Sale", "ReceiptNo")
